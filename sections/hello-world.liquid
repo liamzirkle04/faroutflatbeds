@@ -1,65 +1,39 @@
 {% liquid
-  assign nav_links = section.blocks | where: 'type', 'nav_link'
+  assign hero_image = section.settings.hero_image
+  assign hero_image_mobile = section.settings.hero_image_mobile
+  assign hero_heading = section.settings.hero_heading | default: 'MORE THAN A FLATBED'
+  assign hero_background_url = 'GasStation.jpg' | asset_url
+  assign hero_background_mobile_url = hero_background_url
+
+  if hero_image
+    assign hero_background_url = hero_image | image_url: width: 2600
+  endif
+
+  if hero_image_mobile
+    assign hero_background_mobile_url = hero_image_mobile | image_url: width: 1400
+  elsif hero_image
+    assign hero_background_mobile_url = hero_background_url
+  endif
+
+  assign about_heading_primary = section.settings.about_story_heading_primary | default: 'Born from experience'
+  assign about_heading_secondary = section.settings.about_story_heading_secondary | default: 'What makes us different'
+
   assign story_blocks = section.blocks | where: 'type', 'story_block'
   assign feature_blocks = section.blocks | where: 'type', 'feature_card'
   assign gallery_blocks = section.blocks | where: 'type', 'gallery_image'
-  assign footer_links = section.blocks | where: 'type', 'footer_link'
-  assign footer_socials = section.blocks | where: 'type', 'footer_social'
-
-  assign hero_image = section.settings.hero_image
-  assign hero_image_mobile = section.settings.hero_image_mobile | default: hero_image
-  assign hero_social_label = section.settings.social_label | default: 'Instagram'
-  assign hero_social_initials = hero_social_label | strip | slice: 0, 2 | upcase
-  assign hero_social_label_downcase = hero_social_label | strip | downcase
-  if hero_social_label_downcase contains 'instagram'
-    assign hero_social_initials = 'IG'
-  endif
 %}
 
-<div class="fof-page" data-section-id="{{ section.id }}">
-  <section class="fof-hero" id="top">
-    <div class="fof-hero__bar">
-      <div class="fof-shell fof-hero__shell">
-        <div class="fof-hero__brand">{{ section.settings.logo_text | default: 'Far Out Flatbeds' | escape }}</div>
-        {% if nav_links.size > 0 %}
-          <nav class="fof-hero__nav" aria-label="Primary">
-            <ul>
-              {% for block in nav_links %}
-                <li {{ block.shopify_attributes }}>
-                  <a href="{{ block.settings.link | default: '#' }}">{{ block.settings.label | escape }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </nav>
-        {% endif %}
-        {% if section.settings.show_social_icon %}
-          <a
-            class="fof-hero__social"
-            href="{{ section.settings.social_link | default: '#' }}"
-            aria-label="{{ hero_social_label | escape }}"
-            data-initials="{{ hero_social_initials }}"
-          >
-            <span class="fof-visually-hidden">{{ hero_social_label }}</span>
-          </a>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="fof-hero__stage"
-      {% if hero_image %}
-        style="--fof-hero-image: url('{{ hero_image | image_url: width: 2600 }}');"
-      {% endif %}
-    >
-      <div class="fof-hero__media" {% if hero_image_mobile %}style="--fof-hero-image-mobile: url('{{ hero_image_mobile | image_url: width: 1400 }}');"{% endif %}></div>
-      <div class="fof-shell fof-hero__content">
-        <div class="fof-hero__headline" role="presentation">
-          <span class="fof-hero__accent" aria-hidden="true"></span>
-          <h1>{{ section.settings.hero_heading | default: 'More Than a Flatbed' }}</h1>
-        </div>
-      </div>
-      <div class="fof-hero__scroll" aria-hidden="true">
-        <span>Scroll</span>
-      </div>
+<div class="fof-page" id="top" data-section-id="{{ section.id }}">
+  <section
+    class="fof-hero"
+    style="--fof-hero-image: url('{{ hero_background_url }}');"
+  >
+    <div
+      class="fof-hero__media"
+      style="--fof-hero-image-mobile: url('{{ hero_background_mobile_url }}');"
+    ></div>
+    <div class="fof-shell fof-hero__shell">
+      <h1 class="fof-hero__headline">{{ hero_heading | escape }}</h1>
     </div>
   </section>
 
@@ -101,7 +75,13 @@
                 {% endif %}
               </div>
               <div class="fof-about__story-content">
-                <h3>{{ block.settings.heading | default: 'From garage builds to road-ready systems.' }}</h3>
+                {% assign story_heading = block.settings.heading %}
+                {% if forloop.index == 1 %}
+                  {% assign story_heading = about_heading_primary %}
+                {% elsif forloop.index == 2 %}
+                  {% assign story_heading = about_heading_secondary %}
+                {% endif %}
+                <h3>{{ story_heading }}</h3>
                 {% if block.settings.body != blank %}
                   <p>{{ block.settings.body }}</p>
                 {% endif %}
@@ -268,46 +248,18 @@
     </div>
   </section>
 
-  <footer class="fof-footer">
-    <div class="fof-shell fof-footer__shell">
-      <div class="fof-footer__brand">
-        <span class="fof-footer__title">{{ section.settings.footer_brand | default: 'Far Out Flatbeds' }}</span>
-        {% if section.settings.footer_copy != blank %}
-          <p>{{ section.settings.footer_copy }}</p>
-        {% endif %}
-      </div>
-
-      {% if footer_links.size > 0 %}
-        <nav class="fof-footer__links" aria-label="Footer">
-          <ul>
-            {% for block in footer_links %}
-              <li {{ block.shopify_attributes }}>
-                <a href="{{ block.settings.link | default: '#' }}">{{ block.settings.label | escape }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </nav>
-      {% endif %}
-
-      {% if footer_socials.size > 0 %}
-        <div class="fof-footer__socials">
-          {% for block in footer_socials %}
-            <a {{ block.shopify_attributes }} href="{{ block.settings.link | default: '#' }}" target="_blank" rel="noopener" aria-label="{{ block.settings.label | escape }}">
-              {{ block.settings.label | escape }}
-            </a>
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="fof-footer__bottom">
-      <div class="fof-shell fof-footer__bottom-shell">
-        <span>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.footer_brand | default: 'Far Out Flatbeds' }}. All rights reserved.</span>
-      </div>
-    </div>
-  </footer>
 </div>
 
 {% stylesheet %}
+  #shopify-section-group-header-group,
+  #shopify-section-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #f0f0f0;
+    border-bottom: 1px solid rgba(31, 27, 23, 0.12);
+  }
+
   .fof-page {
     background: #f5f1ea;
     color: #1f1b17;
@@ -317,8 +269,13 @@
   }
 
   .fof-shell {
-    width: min(1200px, 100% - 3rem);
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
+    padding: 0 clamp(1.5rem, 4vw, 4rem);
+  }
+
+  .shopify-section > .fof-page {
+    grid-column: 1 / -1;
   }
 
   .fof-kicker {
@@ -336,196 +293,48 @@
     background: #e5ded5;
   }
 
-  .fof-visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
   /* Hero */
   .fof-hero {
     position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    min-height: 100svh;
+    color: #f5f1ea;
     background: #13100d;
-    color: #fff;
-  }
-
-  .fof-hero__bar {
-    background: #f3eee4;
-    border-bottom: 1px solid rgba(27, 24, 19, 0.08);
-  }
-
-  .fof-hero__shell {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    padding: 18px 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-
-  .fof-hero__brand {
-    font-weight: 700;
-    color: #1d1a16;
-    white-space: nowrap;
-  }
-
-  .fof-hero__nav {
-    margin-left: auto;
-  }
-
-  .fof-hero__nav ul {
-    display: flex;
-    gap: 28px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .fof-hero__nav a {
-    text-decoration: none;
-    color: #1d1a16;
-    font-weight: 600;
-    transition: opacity 0.2s;
-  }
-
-  .fof-hero__nav a:hover,
-  .fof-hero__nav a:focus-visible {
-    opacity: 0.65;
-  }
-
-  .fof-hero__social {
-    margin-left: 24px;
-    text-decoration: none;
-    color: #1d1a16;
-    border: 1px solid rgba(27, 24, 19, 0.3);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    position: relative;
-  }
-
-  .fof-hero__social::after {
-    content: attr(data-initials);
-    font-size: 0.7rem;
-  }
-
-  .fof-hero__social:hover,
-  .fof-hero__social:focus-visible {
-    background: #1d1a16;
-    color: #f3eee4;
-    border-color: #1d1a16;
-  }
-
-  .fof-hero__stage {
-    position: relative;
-    flex: 1 0 auto;
-    display: flex;
-    align-items: flex-end;
-    padding: 0 0 clamp(64px, 12vw, 120px);
     overflow: hidden;
+  }
+
+  .fof-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(12, 10, 8, 0) 0%, rgba(12, 10, 8, 0.65) 100%);
+    z-index: 1;
   }
 
   .fof-hero__media {
     position: absolute;
     inset: 0;
-    background: var(--fof-hero-image-mobile, var(--fof-hero-image, linear-gradient(135deg, #2a2a2a, #111)));
+    background: var(--fof-hero-image-mobile, var(--fof-hero-image, linear-gradient(135deg, #28231d, #120e0a)));
     background-size: cover;
-    background-position: center;
+    background-position: center 70%;
     z-index: 0;
   }
 
-  .fof-hero__stage::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(10, 9, 8, 0.15) 0%, rgba(10, 9, 8, 0.85) 100%);
-    z-index: 1;
-  }
-
-  .fof-hero__content {
+  .fof-hero__shell {
     position: relative;
     z-index: 2;
-    display: grid;
-    gap: 32px;
-    max-width: 600px;
-    padding: 0 clamp(1.5rem, 8vw, 7rem);
-    justify-items: start;
-  }
-
-  .fof-hero__kicker {
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    opacity: 0.7;
+    min-height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    padding: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 5rem) clamp(5rem, 10vw, 8rem);
   }
 
   .fof-hero__headline {
-    display: grid;
-    gap: 16px;
-  }
-
-  .fof-hero__accent {
-    width: 96px;
-    height: 4px;
-    background: #ffffff;
-    border-radius: 999px;
-  }
-
-  .fof-hero__headline h1 {
     margin: 0;
-    font-size: clamp(3rem, 9vw, 4.8rem);
-    letter-spacing: 0.12em;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-  }
-
-  .fof-hero__scroll {
-    position: absolute;
-    right: clamp(1rem, 5vw, 4rem);
-    bottom: clamp(24px, 10vw, 120px);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.74rem;
-    font-weight: 600;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    pointer-events: none;
-  }
-
-  .fof-hero__scroll::before {
-    content: '';
-    display: block;
-    width: 1px;
-    height: 64px;
-    background: rgba(255, 255, 255, 0.45);
-    margin-bottom: 12px;
-  }
-
-  @media (max-width: 900px) {
-    .fof-hero__scroll {
-      display: none;
-    }
+    width: 100%;
+    text-align: left;
   }
 
   /* About */
@@ -555,21 +364,14 @@
 
   .fof-about__stories {
     display: grid;
-    gap: 48px;
+    gap: clamp(32px, 6vw, 64px);
   }
 
   .fof-about__story {
     display: grid;
-    gap: 32px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(24px, 4vw, 48px);
     align-items: center;
-  }
-
-  .fof-about__story--image-left {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  }
-
-  .fof-about__story--image-right {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 
   .fof-about__story--image-right .fof-about__story-media {
@@ -590,6 +392,12 @@
     box-shadow: 0 16px 36px rgba(23, 20, 16, 0.12);
     display: grid;
     gap: 16px;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .fof-about__story--image-right .fof-about__story-content {
+    order: 1;
   }
 
   .fof-about__story-content h3 {
@@ -843,104 +651,10 @@
     transform: translateY(-1px);
   }
 
-  /* Footer */
-  .fof-footer {
-    margin-top: -20px;
-    color: #221f1b;
-  }
-
-  .fof-footer__shell {
-    display: grid;
-    gap: 32px;
-    padding: clamp(48px, 8vw, 80px) 0;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    align-items: start;
-  }
-
-  .fof-footer__title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-  }
-
-  .fof-footer__brand p {
-    margin: 12px 0 0;
-    color: rgba(34, 31, 27, 0.75);
-    line-height: 1.6;
-  }
-
-  .fof-footer__links ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 12px;
-  }
-
-  .fof-footer__links a {
-    text-decoration: none;
-    color: inherit;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-
-  .fof-footer__links a:hover,
-  .fof-footer__links a:focus-visible {
-    opacity: 0.7;
-  }
-
-  .fof-footer__socials {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .fof-footer__socials a {
-    text-decoration: none;
-    padding: 8px 18px;
-    border-radius: 999px;
-    border: 1px solid rgba(34, 31, 27, 0.2);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-  }
-
-  .fof-footer__socials a:hover,
-  .fof-footer__socials a:focus-visible {
-    background: rgba(34, 31, 27, 0.08);
-  }
-
-  .fof-footer__bottom {
-    background: rgba(34, 31, 27, 0.05);
-    border-top: 1px solid rgba(34, 31, 27, 0.08);
-    padding: 18px 0;
-  }
-
-  .fof-footer__bottom-shell {
-    display: flex;
-    justify-content: center;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   /* Responsive adjustments */
   @media (max-width: 1100px) {
     .fof-page {
       gap: 96px;
-    }
-
-    .fof-hero__shell {
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .fof-hero__nav {
-      margin-left: 0;
-    }
-
-    .fof-hero__social {
-      margin-left: 0;
     }
 
     .fof-about__story-content {
@@ -953,32 +667,22 @@
       gap: 72px;
     }
 
-    .fof-shell {
-      width: min(100%, calc(100% - 2rem));
+    .fof-hero__headline {
+      letter-spacing: 0.1em;
     }
 
-    .fof-hero {
-      min-height: 90vh;
-    }
-
+    .fof-hero,
     .fof-hero__shell {
-      flex-direction: column;
-      gap: 16px;
-      text-align: center;
+      min-height: 100vh;
     }
 
-    .fof-hero__nav ul {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 18px;
-    }
-
-    .fof-hero__content {
-      padding: 0 1.5rem;
+    .fof-hero__media {
+      background-position: center 80%;
     }
 
     .fof-about__story {
       grid-template-columns: 1fr;
+      gap: 24px;
     }
 
     .fof-about__story--image-right .fof-about__story-media {
@@ -991,10 +695,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .fof-hero__nav a,
-    .fof-hero__social,
-    .fof-form__submit,
-    .fof-footer__socials a {
+    .fof-form__submit {
       transition: none;
     }
   }
@@ -1004,29 +705,6 @@
 {
   "name": "Far Out Landing",
   "settings": [
-    {
-      "type": "text",
-      "id": "logo_text",
-      "label": "Navigation brand text",
-      "default": "Far Out Flatbeds"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_social_icon",
-      "label": "Show hero social link",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "social_label",
-      "label": "Hero social label",
-      "default": "Instagram"
-    },
-    {
-      "type": "url",
-      "id": "social_link",
-      "label": "Hero social URL"
-    },
     {
       "type": "image_picker",
       "id": "hero_image",
@@ -1039,19 +717,9 @@
     },
     {
       "type": "text",
-      "id": "hero_kicker",
-      "label": "Hero kicker"
-    },
-    {
-      "type": "text",
       "id": "hero_heading",
       "label": "Hero heading",
-      "default": "More Than a Flatbed"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_subheading",
-      "label": "Hero subheading"
+      "default": "MORE THAN A FLATBED"
     },
     {
       "type": "text",
@@ -1070,6 +738,18 @@
       "id": "about_intro",
       "label": "About intro",
       "default": "We set out to create a flatbed system that works as hard as you do — light enough to go anywhere, strong enough to haul anything, and modular enough to evolve with every build."
+    },
+    {
+      "type": "text",
+      "id": "about_story_heading_primary",
+      "label": "Primary story heading",
+      "default": "Born from experience"
+    },
+    {
+      "type": "text",
+      "id": "about_story_heading_secondary",
+      "label": "Secondary story heading",
+      "default": "What makes us different"
     },
     {
       "type": "text",
@@ -1134,38 +814,9 @@
       "id": "contact_button_label",
       "label": "Contact button label",
       "default": "Request Information"
-    },
-    {
-      "type": "text",
-      "id": "footer_brand",
-      "label": "Footer brand",
-      "default": "Far Out Flatbeds"
-    },
-    {
-      "type": "textarea",
-      "id": "footer_copy",
-      "label": "Footer copy",
-      "default": "Strong. Lightweight. Endlessly modular. Crafted in small batches for builders, explorers, and anyone chasing the next road out."
     }
   ],
   "blocks": [
-    {
-      "type": "nav_link",
-      "name": "Navigation link",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Features"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Link"
-        }
-      ]
-    },
     {
       "type": "story_block",
       "name": "About story",
@@ -1243,89 +894,11 @@
           "label": "Caption"
         }
       ]
-    },
-    {
-      "type": "footer_link",
-      "name": "Footer link",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Shop"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "URL"
-        }
-      ]
-    },
-    {
-      "type": "footer_social",
-      "name": "Footer social",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Instagram"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "URL"
-        }
-      ]
     }
   ],
   "presets": [
     {
-      "name": "Far Out Landing",
-      "blocks": [
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "Home",
-            "link": "#top"
-          }
-        },
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "About",
-            "link": "#about"
-          }
-        },
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "Features",
-            "link": "#features"
-          }
-        },
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "Shop",
-            "link": "/collections/all"
-          }
-        },
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "Gallery",
-            "link": "#gallery"
-          }
-        },
-        {
-          "type": "nav_link",
-          "settings": {
-            "label": "Contact",
-            "link": "#contact"
-          }
-        }
-      ]
+      "name": "Far Out Landing"
     }
   ]
 }
