@@ -1,143 +1,1296 @@
-{% comment %}
-  Welcome to Shopify theme development!
-{% endcomment %}
+{% liquid
+  assign nav_links = section.blocks | where: 'type', 'nav_link'
+  assign story_blocks = section.blocks | where: 'type', 'story_block'
+  assign feature_blocks = section.blocks | where: 'type', 'feature_card'
+  assign gallery_blocks = section.blocks | where: 'type', 'gallery_image'
+  assign footer_links = section.blocks | where: 'type', 'footer_link'
+  assign footer_socials = section.blocks | where: 'type', 'footer_social'
 
-<div class="welcome full-width">
-  <div class="welcome-content">
-    <div>
-      <h1>1234556!</h1>
+  assign hero_image = section.settings.hero_image
+  assign hero_image_mobile = section.settings.hero_image_mobile | default: hero_image
+  assign hero_social_label = section.settings.social_label | default: 'Instagram'
+  assign hero_social_initials = hero_social_label | strip | slice: 0, 2 | upcase
+  assign hero_social_label_downcase = hero_social_label | strip | downcase
+  if hero_social_label_downcase contains 'instagram'
+    assign hero_social_initials = 'IG'
+  endif
+%}
 
-      <p class="welcome-description">
-        The Skeleton theme is a minimal, carefully structured Shopify theme designed to help you quickly get started.
-        Designed with modularity, maintainability, and Shopify's best practices in mind.
-      </p>
-
-      <p class="welcome-description">
-        Themes shape the online store experience for merchants and their customers. Build fast, flexible themes at scale
-        using Liquid, Shopify's theme templating language, along with HTML, CSS, JavaScript, and JSON.
-      </p>
+<div class="fof-page" data-section-id="{{ section.id }}">
+  <section class="fof-hero" id="top">
+    <div class="fof-hero__bar">
+      <div class="fof-shell fof-hero__shell">
+        <div class="fof-hero__brand">{{ section.settings.logo_text | default: 'Far Out Flatbeds' | escape }}</div>
+        {% if nav_links.size > 0 %}
+          <nav class="fof-hero__nav" aria-label="Primary">
+            <ul>
+              {% for block in nav_links %}
+                <li {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.link | default: '#' }}">{{ block.settings.label | escape }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </nav>
+        {% endif %}
+        {% if section.settings.show_social_icon %}
+          <a
+            class="fof-hero__social"
+            href="{{ section.settings.social_link | default: '#' }}"
+            aria-label="{{ hero_social_label | escape }}"
+            data-initials="{{ hero_social_initials }}"
+          >
+            <span class="fof-visually-hidden">{{ hero_social_label }}</span>
+          </a>
+        {% endif %}
+      </div>
     </div>
-    <div class="icon">
-      <img src="{{ 'shoppy-x-ray.svg' | asset_url }}" width="300" height="300">
+
+    <div class="fof-hero__stage"
+      {% if hero_image %}
+        style="--fof-hero-image: url('{{ hero_image | image_url: width: 2600 }}');"
+      {% endif %}
+    >
+      <div class="fof-hero__media" {% if hero_image_mobile %}style="--fof-hero-image-mobile: url('{{ hero_image_mobile | image_url: width: 1400 }}');"{% endif %}></div>
+      <div class="fof-shell fof-hero__content">
+        <div class="fof-hero__headline" role="presentation">
+          <span class="fof-hero__accent" aria-hidden="true"></span>
+          <h1>{{ section.settings.hero_heading | default: 'More Than a Flatbed' }}</h1>
+        </div>
+      </div>
+      <div class="fof-hero__scroll" aria-hidden="true">
+        <span>Scroll</span>
+      </div>
     </div>
-  </div>
-</div>
+  </section>
 
-<div class="highlights">
-  <div class="highlight">
-    <h3>Key Concepts</h3>
-    <p class="highlight-description">
-      Shopify themes are a package of template files, building blocks, and supporting assets. Use these building blocks
-      to create modular, customizable themes.
-    </p>
-    <p>{{ 'Learn more about key concepts' | link_to: 'https://shopify.dev/docs/storefronts/themes/architecture' }}</p>
-  </div>
+  <section class="fof-about" id="about">
+    <div class="fof-shell fof-about__shell">
+      <div class="fof-about__intro">
+        <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
+        <h2>{{ section.settings.about_heading | default: 'Built by enthusiasts, for enthusiasts.' }}</h2>
+        {% if section.settings.about_intro != blank %}
+          <p>{{ section.settings.about_intro }}</p>
+        {% endif %}
+      </div>
 
-  <div class="highlight">
-    <h3>Liquid</h3>
-    <p class="highlight-description">
-      The Liquid templating language is the backbone of Shopify themes, and is used to load dynamic content on
-      storefronts. Extend Liquid objects to store and present custom data using metafields.
-    </p>
-    <p>{{ 'View the Liquid reference' | link_to: 'https://shopify.dev/docs/api/liquid' }}</p>
-  </div>
+      {% if story_blocks.size > 0 %}
+        <div class="fof-about__stories">
+          {% for block in story_blocks %}
+            {% liquid
+              assign position_class = 'fof-about__story--image-left'
+              assign index_modulo = forloop.index0 | modulo: 2
+              if index_modulo == 1
+                assign position_class = 'fof-about__story--image-right'
+              endif
+            %}
+            <article class="fof-about__story {{ position_class }}" {{ block.shopify_attributes }}>
+              <div class="fof-about__story-media">
+                {% if block.settings.image %}
+                  <img src="{{ block.settings.image | image_url: width: 1100 }}" alt="{{ block.settings.image_alt | escape }}">
+                {% else %}
+                  {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
+                {% endif %}
+              </div>
+              <div class="fof-about__story-content">
+                <h3>{{ block.settings.heading | default: 'From garage builds to road-ready systems.' }}</h3>
+                {% if block.settings.body != blank %}
+                  <p>{{ block.settings.body }}</p>
+                {% endif %}
+                {% if block.settings.highlight != blank %}
+                  <div class="fof-about__stat">
+                    <span>{{ block.settings.highlight }}</span>
+                  </div>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
 
-  <div class="highlight">
-    <h3>Best Practices</h3>
-    <p class="highlight-description">
-      To optimize your theme development experience, Shopify has established a set of best practices that you can refer
-      to when developing your theme and setting up your toolchains and processes.
-    </p>
-    <p>{{ 'Follow best practices' | link_to: 'https://shopify.dev/docs/storefronts/themes/best-practices' }}</p>
-  </div>
+  <section class="fof-features" id="features">
+    <div class="fof-shell fof-features__shell">
+      <div class="fof-features__head">
+        <span class="fof-kicker">{{ section.settings.features_kicker | default: 'Modular By Design' }}</span>
+        <h2>{{ section.settings.features_heading | default: 'Built to evolve with every mile.' }}</h2>
+        {% if section.settings.features_subheading != blank %}
+          <p>{{ section.settings.features_subheading }}</p>
+        {% endif %}
+      </div>
+      {% if feature_blocks.size > 0 %}
+        <div class="fof-features__grid">
+          {% for block in feature_blocks %}
+            <article class="fof-feature-card" {{ block.shopify_attributes }}>
+              <div class="fof-feature-card__media">
+                {% if block.settings.image %}
+                  <img src="{{ block.settings.image | image_url: width: 900 }}" alt="{{ block.settings.image_alt | escape }}">
+                {% else %}
+                  {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
+                {% endif %}
+              </div>
+              <div class="fof-feature-card__content">
+                <h3>{{ block.settings.title | default: 'Bolt-Together Core' }}</h3>
+                {% if block.settings.description != blank %}
+                  <p>{{ block.settings.description }}</p>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="fof-gallery" id="gallery">
+    <div class="fof-shell fof-gallery__shell">
+      <div class="fof-gallery__head">
+        <span class="fof-kicker">{{ section.settings.gallery_kicker | default: 'Real Builds' }}</span>
+        <h2>{{ section.settings.gallery_heading | default: 'Flatbeds in the wild.' }}</h2>
+        {% if section.settings.gallery_subheading != blank %}
+          <p>{{ section.settings.gallery_subheading }}</p>
+        {% endif %}
+      </div>
+      {% if gallery_blocks.size > 0 %}
+        <div class="fof-gallery__grid">
+          {% for block in gallery_blocks %}
+            <figure class="fof-gallery__item" {{ block.shopify_attributes }}>
+              <div class="fof-gallery__image">
+                {% if block.settings.image %}
+                  <img src="{{ block.settings.image | image_url: width: 1000 }}" alt="{{ block.settings.caption | escape }}">
+                {% else %}
+                  {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
+                {% endif %}
+              </div>
+              {% if block.settings.caption != blank %}
+                <figcaption>{{ block.settings.caption }}</figcaption>
+              {% endif %}
+            </figure>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="fof-contact" id="contact">
+    <div class="fof-shell fof-contact__shell">
+      <div class="fof-contact__copy">
+        <span class="fof-kicker">{{ section.settings.contact_kicker | default: 'Let’s Talk Trucks' }}</span>
+        <h2>{{ section.settings.contact_heading | default: 'Ready to build your perfect flatbed?' }}</h2>
+        {% if section.settings.contact_body != blank %}
+          <p>{{ section.settings.contact_body }}</p>
+        {% endif %}
+      </div>
+
+      <div class="fof-contact__form">
+        {% form 'contact', class: 'fof-form' %}
+          {% if form.posted_successfully? %}
+            <div class="fof-form__banner fof-form__banner--success" role="status">
+              {{ 'templates.contact.form.post_success' | t }}
+            </div>
+          {% elsif form.errors %}
+            <div class="fof-form__banner fof-form__banner--error" role="alert">
+              {{ form.errors | default_errors }}
+            </div>
+          {% endif %}
+
+          <div class="fof-form__fields">
+            <label class="fof-field">
+              <span>Name *</span>
+              <input type="text" name="contact[name]" required maxlength="100" placeholder="Jane Doe">
+            </label>
+            <label class="fof-field">
+              <span>Email *</span>
+              <input type="email" name="contact[email]" required placeholder="name@email.com">
+            </label>
+            <label class="fof-field">
+              <span>Phone</span>
+              <input type="tel" name="contact[phone]" placeholder="(555) 123-4567">
+            </label>
+            <label class="fof-field">
+              <span>Truck Make *</span>
+              <input type="text" name="contact[truck_make]" required placeholder="Ford, Chevrolet, Ram...">
+            </label>
+            <label class="fof-field">
+              <span>Model *</span>
+              <input type="text" name="contact[truck_model]" required placeholder="F-350, Silverado, etc.">
+            </label>
+            <label class="fof-field">
+              <span>Year *</span>
+              <input type="number" name="contact[truck_year]" required min="1970" max="{{ 'now' | date: '%Y' }}" placeholder="2024">
+            </label>
+            <label class="fof-field fof-field--full">
+              <span>Tell us about your build</span>
+              <textarea name="contact[body]" rows="4" placeholder="Share how you plan to use your flatbed, any accessories, special requirements, or ideas."></textarea>
+            </label>
+          </div>
+
+          <button type="submit" class="fof-form__submit">{{ section.settings.contact_button_label | default: 'Request Information' }}</button>
+        {% endform %}
+      </div>
+    </div>
+  </section>
+
+  <footer class="fof-footer">
+    <div class="fof-shell fof-footer__shell">
+      <div class="fof-footer__brand">
+        <span class="fof-footer__title">{{ section.settings.footer_brand | default: 'Far Out Flatbeds' }}</span>
+        {% if section.settings.footer_copy != blank %}
+          <p>{{ section.settings.footer_copy }}</p>
+        {% endif %}
+      </div>
+
+      {% if footer_links.size > 0 %}
+        <nav class="fof-footer__links" aria-label="Footer">
+          <ul>
+            {% for block in footer_links %}
+              <li {{ block.shopify_attributes }}>
+                <a href="{{ block.settings.link | default: '#' }}">{{ block.settings.label | escape }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+
+      {% if footer_socials.size > 0 %}
+        <div class="fof-footer__socials">
+          {% for block in footer_socials %}
+            <a {{ block.shopify_attributes }} href="{{ block.settings.link | default: '#' }}" target="_blank" rel="noopener" aria-label="{{ block.settings.label | escape }}">
+              {{ block.settings.label | escape }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    <div class="fof-footer__bottom">
+      <div class="fof-shell fof-footer__bottom-shell">
+        <span>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.footer_brand | default: 'Far Out Flatbeds' }}. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
 </div>
 
 {% stylesheet %}
-  .welcome {
-    display: grid;
-    grid-template-columns: var(--content-grid);
-    background-color: #f6f6f7;
-    padding: 72px 0;
-  }
-
-  .welcome-content {
-    grid-column: 2;
+  .fof-page {
+    background: #f5f1ea;
+    color: #1f1b17;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 120px;
+  }
+
+  .fof-shell {
+    width: min(1200px, 100% - 3rem);
+    margin: 0 auto;
+  }
+
+  .fof-kicker {
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(24, 21, 17, 0.7);
+  }
+
+  .fof-placeholder {
     width: 100%;
-    padding: 0 24px;
+    height: 100%;
+    background: #e5ded5;
   }
 
-  .welcome-description {
-    max-width: 80ch;
-    line-height: 1.4;
-    margin-top: 1.5rem;
+  .fof-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
-  .icon {
-    width: 300px;
+  /* Hero */
+  .fof-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #13100d;
+    color: #fff;
   }
 
-  .highlights {
+  .fof-hero__bar {
+    background: #f3eee4;
+    border-bottom: 1px solid rgba(27, 24, 19, 0.08);
+  }
+
+  .fof-hero__shell {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 18px 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .fof-hero__brand {
+    font-weight: 700;
+    color: #1d1a16;
+    white-space: nowrap;
+  }
+
+  .fof-hero__nav {
+    margin-left: auto;
+  }
+
+  .fof-hero__nav ul {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .fof-hero__nav a {
+    text-decoration: none;
+    color: #1d1a16;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+
+  .fof-hero__nav a:hover,
+  .fof-hero__nav a:focus-visible {
+    opacity: 0.65;
+  }
+
+  .fof-hero__social {
+    margin-left: 24px;
+    text-decoration: none;
+    color: #1d1a16;
+    border: 1px solid rgba(27, 24, 19, 0.3);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  .fof-hero__social::after {
+    content: attr(data-initials);
+    font-size: 0.7rem;
+  }
+
+  .fof-hero__social:hover,
+  .fof-hero__social:focus-visible {
+    background: #1d1a16;
+    color: #f3eee4;
+    border-color: #1d1a16;
+  }
+
+  .fof-hero__stage {
+    position: relative;
+    flex: 1 0 auto;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 0 clamp(64px, 12vw, 120px);
+    overflow: hidden;
+  }
+
+  .fof-hero__media {
+    position: absolute;
+    inset: 0;
+    background: var(--fof-hero-image-mobile, var(--fof-hero-image, linear-gradient(135deg, #2a2a2a, #111)));
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+
+  .fof-hero__stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 9, 8, 0.15) 0%, rgba(10, 9, 8, 0.85) 100%);
+    z-index: 1;
+  }
+
+  .fof-hero__content {
+    position: relative;
+    z-index: 2;
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(3, 1fr);
-    margin-top: 50px;
+    gap: 32px;
+    max-width: 600px;
+    padding: 0 clamp(1.5rem, 8vw, 7rem);
+    justify-items: start;
   }
 
-  @media (max-width: 1100px) {
-    .highlights {
-      grid-template-columns: 1fr;
+  .fof-hero__kicker {
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .fof-hero__headline {
+    display: grid;
+    gap: 16px;
+  }
+
+  .fof-hero__accent {
+    width: 96px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 999px;
+  }
+
+  .fof-hero__headline h1 {
+    margin: 0;
+    font-size: clamp(3rem, 9vw, 4.8rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .fof-hero__scroll {
+    position: absolute;
+    right: clamp(1rem, 5vw, 4rem);
+    bottom: clamp(24px, 10vw, 120px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    pointer-events: none;
+  }
+
+  .fof-hero__scroll::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.45);
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .fof-hero__scroll {
+      display: none;
     }
   }
 
-  .highlight {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  /* About */
+  .fof-about {
+    position: relative;
+    color: #1f1b17;
+  }
+
+  .fof-about__intro {
+    max-width: 700px;
+    display: grid;
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+
+  .fof-about__intro h2 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .fof-about__intro p {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(31, 27, 23, 0.78);
+  }
+
+  .fof-about__stories {
+    display: grid;
+    gap: 48px;
+  }
+
+  .fof-about__story {
+    display: grid;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .fof-about__story--image-left {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .fof-about__story--image-right {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .fof-about__story--image-right .fof-about__story-media {
+    order: 2;
+  }
+
+  .fof-about__story-media img {
+    width: 100%;
+    border-radius: 28px;
+    display: block;
+    box-shadow: 0 24px 40px rgba(23, 20, 16, 0.16);
+  }
+
+  .fof-about__story-content {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 32px;
+    padding: clamp(24px, 5vw, 44px);
+    box-shadow: 0 16px 36px rgba(23, 20, 16, 0.12);
+    display: grid;
+    gap: 16px;
+  }
+
+  .fof-about__story-content h3 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+
+  .fof-about__story-content p {
+    margin: 0;
+    line-height: 1.6;
+    color: rgba(31, 27, 23, 0.78);
+  }
+
+  .fof-about__stat {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(31, 27, 23, 0.1);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+  }
+
+  /* Features */
+  .fof-features {
+    padding: 0;
+  }
+
+  .fof-features__head {
+    display: grid;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .fof-features__head h2 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .fof-features__head p {
+    margin: 0;
+    line-height: 1.6;
+    color: rgba(31, 27, 23, 0.75);
+  }
+
+  .fof-features__grid {
+    margin-top: 48px;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .fof-feature-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    display: grid;
+    gap: 0;
+    box-shadow: 0 22px 40px rgba(23, 20, 16, 0.12);
+  }
+
+  .fof-feature-card__media img {
+    width: 100%;
+    display: block;
+  }
+
+  .fof-feature-card__content {
     padding: 24px;
-    border-radius: 8px;
-    background-color: #eef3ff;
-    color: rgb(92, 95, 98);
-    line-height: 1.4;
+    display: grid;
+    gap: 10px;
   }
 
-  .highlight > * + * {
-    margin-top: 1rem;
+  .fof-feature-card__content h3 {
+    margin: 0;
+    font-size: 1.3rem;
   }
 
-  .highlight h3 {
-    font-size: 1rem;
-    color: rgb(32, 34, 35);
+  .fof-feature-card__content p {
+    margin: 0;
+    color: rgba(31, 27, 23, 0.75);
+    line-height: 1.5;
   }
 
-  .highlight-description {
-    flex: 1 1;
+  /* Gallery */
+  .fof-gallery__head {
+    display: grid;
+    gap: 18px;
+    max-width: 640px;
   }
 
-  .highlight a {
-    display: flex;
-    width: fit-content;
-    background-color: rgb(250, 251, 251);
-    box-shadow: rgba(0, 0, 0, 0.2) 0px -3px 0px 0px inset, rgba(255, 255, 255, 0.9) 0px 2px 0px 0px inset;
-    border: 1px solid rgb(140, 145, 150);
-    border-radius: 4px;
-    color: rgb(92, 95, 98);
-    padding: 3px 10px 5px;
+  .fof-gallery__head h2 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .fof-gallery__head p {
+    margin: 0;
+    line-height: 1.6;
+    color: rgba(31, 27, 23, 0.75);
+  }
+
+  .fof-gallery__grid {
+    margin-top: 48px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .fof-gallery__item {
+    display: grid;
+    gap: 12px;
+  }
+
+  .fof-gallery__image {
+    position: relative;
+    padding-bottom: 65%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 18px 30px rgba(23, 20, 16, 0.12);
+  }
+
+  .fof-gallery__image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .fof-gallery__item figcaption {
+    font-size: 0.95rem;
+    color: rgba(31, 27, 23, 0.7);
+  }
+
+  /* Contact */
+  .fof-contact {
+    background: linear-gradient(135deg, rgba(23, 20, 16, 0.9), rgba(38, 34, 30, 0.85)), url('{{ section.settings.contact_background | image_url: width: 2000 }}');
+    background-size: cover;
+    background-position: center;
+    color: #fdf8f1;
+    padding: clamp(64px, 12vw, 120px) 0;
+  }
+
+  .fof-contact__shell {
+    display: grid;
+    gap: clamp(40px, 8vw, 80px);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+
+  .fof-contact__copy {
+    display: grid;
+    gap: 20px;
+    max-width: 520px;
+  }
+
+  .fof-contact__copy h2 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .fof-contact__copy p {
+    margin: 0;
+    line-height: 1.7;
+    color: rgba(253, 248, 241, 0.82);
+  }
+
+  .fof-form {
+    background: rgba(17, 15, 13, 0.75);
+    border-radius: 28px;
+    padding: clamp(24px, 6vw, 40px);
+    display: grid;
+    gap: 24px;
+    box-shadow: 0 22px 36px rgba(0, 0, 0, 0.35);
+  }
+
+  .fof-form__banner {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+
+  .fof-form__banner--success {
+    background: rgba(80, 160, 120, 0.25);
+    border: 1px solid rgba(80, 160, 120, 0.4);
+  }
+
+  .fof-form__banner--error {
+    background: rgba(200, 80, 60, 0.25);
+    border: 1px solid rgba(200, 80, 60, 0.45);
+  }
+
+  .fof-form__fields {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .fof-field {
+    display: grid;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+
+  .fof-field span {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .fof-field input,
+  .fof-field textarea {
+    border: 1px solid rgba(253, 248, 241, 0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: rgba(12, 11, 10, 0.75);
+    color: inherit;
+  }
+
+  .fof-field input:focus,
+  .fof-field textarea:focus {
+    outline: 2px solid rgba(253, 248, 241, 0.8);
+    outline-offset: 2px;
+  }
+
+  .fof-field textarea {
+    resize: vertical;
+  }
+
+  .fof-field.fof-field--full {
+    grid-column: 1 / -1;
+  }
+
+  .fof-form__submit {
+    justify-self: flex-start;
+    padding: 16px 32px;
+    border-radius: 16px;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+    background: #f5f1ea;
+    color: #13100d;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .fof-form__submit:hover,
+  .fof-form__submit:focus-visible {
+    transform: translateY(-1px);
+  }
+
+  /* Footer */
+  .fof-footer {
+    margin-top: -20px;
+    color: #221f1b;
+  }
+
+  .fof-footer__shell {
+    display: grid;
+    gap: 32px;
+    padding: clamp(48px, 8vw, 80px) 0;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-items: start;
+  }
+
+  .fof-footer__title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .fof-footer__brand p {
+    margin: 12px 0 0;
+    color: rgba(34, 31, 27, 0.75);
+    line-height: 1.6;
+  }
+
+  .fof-footer__links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .fof-footer__links a {
     text-decoration: none;
+    color: inherit;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .fof-footer__links a:hover,
+  .fof-footer__links a:focus-visible {
+    opacity: 0.7;
+  }
+
+  .fof-footer__socials {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .fof-footer__socials a {
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 31, 27, 0.2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .fof-footer__socials a:hover,
+  .fof-footer__socials a:focus-visible {
+    background: rgba(34, 31, 27, 0.08);
+  }
+
+  .fof-footer__bottom {
+    background: rgba(34, 31, 27, 0.05);
+    border-top: 1px solid rgba(34, 31, 27, 0.08);
+    padding: 18px 0;
+  }
+
+  .fof-footer__bottom-shell {
+    display: flex;
+    justify-content: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1100px) {
+    .fof-page {
+      gap: 96px;
+    }
+
+    .fof-hero__shell {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .fof-hero__nav {
+      margin-left: 0;
+    }
+
+    .fof-hero__social {
+      margin-left: 0;
+    }
+
+    .fof-about__story-content {
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .fof-page {
+      gap: 72px;
+    }
+
+    .fof-shell {
+      width: min(100%, calc(100% - 2rem));
+    }
+
+    .fof-hero {
+      min-height: 90vh;
+    }
+
+    .fof-hero__shell {
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .fof-hero__nav ul {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .fof-hero__content {
+      padding: 0 1.5rem;
+    }
+
+    .fof-about__story {
+      grid-template-columns: 1fr;
+    }
+
+    .fof-about__story--image-right .fof-about__story-media {
+      order: 0;
+    }
+
+    .fof-gallery__image {
+      padding-bottom: 70%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fof-hero__nav a,
+    .fof-hero__social,
+    .fof-form__submit,
+    .fof-footer__socials a {
+      transition: none;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Hello World",
-  "settings": [],
+  "name": "Far Out Landing",
+  "settings": [
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Navigation brand text",
+      "default": "Far Out Flatbeds"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_icon",
+      "label": "Show hero social link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "social_label",
+      "label": "Hero social label",
+      "default": "Instagram"
+    },
+    {
+      "type": "url",
+      "id": "social_link",
+      "label": "Hero social URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image_mobile",
+      "label": "Hero background image (mobile)"
+    },
+    {
+      "type": "text",
+      "id": "hero_kicker",
+      "label": "Hero kicker",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "hero_heading",
+      "label": "Hero heading",
+      "default": "More Than a Flatbed"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subheading",
+      "label": "Hero subheading",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "about_kicker",
+      "label": "About kicker",
+      "default": "Born From The Trail"
+    },
+    {
+      "type": "text",
+      "id": "about_heading",
+      "label": "About heading",
+      "default": "Built by enthusiasts, for enthusiasts."
+    },
+    {
+      "type": "textarea",
+      "id": "about_intro",
+      "label": "About intro",
+      "default": "We set out to create a flatbed system that works as hard as you do — light enough to go anywhere, strong enough to haul anything, and modular enough to evolve with every build."
+    },
+    {
+      "type": "text",
+      "id": "features_kicker",
+      "label": "Features kicker",
+      "default": "Modular By Design"
+    },
+    {
+      "type": "text",
+      "id": "features_heading",
+      "label": "Features heading",
+      "default": "Built to evolve with every mile."
+    },
+    {
+      "type": "textarea",
+      "id": "features_subheading",
+      "label": "Features subheading",
+      "default": "Every Far Out Flatbed is a platform for accessories, storage, and future upgrades. Swap modules, add gear, and tune your rig for work or play."
+    },
+    {
+      "type": "text",
+      "id": "gallery_kicker",
+      "label": "Gallery kicker",
+      "default": "Real Builds"
+    },
+    {
+      "type": "text",
+      "id": "gallery_heading",
+      "label": "Gallery heading",
+      "default": "Flatbeds in the wild."
+    },
+    {
+      "type": "textarea",
+      "id": "gallery_subheading",
+      "label": "Gallery subheading"
+    },
+    {
+      "type": "image_picker",
+      "id": "contact_background",
+      "label": "Contact background image"
+    },
+    {
+      "type": "text",
+      "id": "contact_kicker",
+      "label": "Contact kicker",
+      "default": "Let’s Talk Trucks"
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Contact heading",
+      "default": "Ready to build your perfect flatbed?"
+    },
+    {
+      "type": "textarea",
+      "id": "contact_body",
+      "label": "Contact body",
+      "default": "Tell us what you’re driving and how you want to use it. We’ll walk you through the options, timelines, and the modular pieces that make the most sense for your build."
+    },
+    {
+      "type": "text",
+      "id": "contact_button_label",
+      "label": "Contact button label",
+      "default": "Request Information"
+    },
+    {
+      "type": "text",
+      "id": "footer_brand",
+      "label": "Footer brand",
+      "default": "Far Out Flatbeds"
+    },
+    {
+      "type": "textarea",
+      "id": "footer_copy",
+      "label": "Footer copy",
+      "default": "Strong. Lightweight. Endlessly modular. Crafted in small batches for builders, explorers, and anyone chasing the next road out."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "nav_link",
+      "name": "Navigation link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Features"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "story_block",
+      "name": "About story",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "From garage builds to road-ready systems."
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Body",
+          "default": "What started as a personal project became a modular platform for the community. Every detail is engineered for quick service, easy upgrades, and hard miles."
+        },
+        {
+          "type": "text",
+          "id": "highlight",
+          "label": "Highlight",
+          "default": "5+ Years Building"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text"
+        }
+      ]
+    },
+    {
+      "type": "feature_card",
+      "name": "Feature card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Bolt-Together Core"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Anodized aluminum extrusions connect with serviceable hardware so repairs and upgrades happen without downtime."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text"
+        }
+      ]
+    },
+    {
+      "type": "gallery_image",
+      "name": "Gallery image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption"
+        }
+      ]
+    },
+    {
+      "type": "footer_link",
+      "name": "Footer link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "URL"
+        }
+      ]
+    },
+    {
+      "type": "footer_social",
+      "name": "Footer social",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Instagram"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "URL"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Hello World Template",
-      "category": "Demo"
+      "name": "Far Out Landing",
+      "blocks": [
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "Home",
+            "link": "#top"
+          }
+        },
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "About",
+            "link": "#about"
+          }
+        },
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "Features",
+            "link": "#features"
+          }
+        },
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "Shop",
+            "link": "/collections/all"
+          }
+        },
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "Gallery",
+            "link": "#gallery"
+          }
+        },
+        {
+          "type": "nav_link",
+          "settings": {
+            "label": "Contact",
+            "link": "#contact"
+          }
+        }
+      ]
     }
   ]
 }
