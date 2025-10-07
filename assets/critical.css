@@ -115,3 +115,10 @@ body {
 .shopify-section > .full-width {
   grid-column: 1 / -1;
 }
+
+.shopify-section-group-header-group {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--color-background);
+}
