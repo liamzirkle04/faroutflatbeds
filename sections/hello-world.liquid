@@ -82,11 +82,20 @@
               if index_modulo == 1
                 assign position_class = 'fof-about__story--image-right'
               endif
+              assign story_alt = block.settings.image_alt | default: block.settings.heading
+              assign story_alt = story_alt | strip
+              assign story_alt = story_alt | escape
             %}
             <article class="fof-about__story {{ position_class }}" {{ block.shopify_attributes }}>
               <div class="fof-about__story-media">
                 {% if block.settings.image %}
-                  <img src="{{ block.settings.image | image_url: width: 1100 }}" alt="{{ block.settings.image_alt | escape }}">
+                  {{ block.settings.image
+                    | image_url: width: 1100
+                    | image_tag:
+                      alt: story_alt,
+                      loading: 'lazy',
+                      widths: '550, 750, 1100'
+                  }}
                 {% else %}
                   {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
                 {% endif %}
@@ -124,7 +133,18 @@
             <article class="fof-feature-card" {{ block.shopify_attributes }}>
               <div class="fof-feature-card__media">
                 {% if block.settings.image %}
-                  <img src="{{ block.settings.image | image_url: width: 900 }}" alt="{{ block.settings.image_alt | escape }}">
+                  {% liquid
+                    assign feature_alt = block.settings.image_alt | default: block.settings.title
+                    assign feature_alt = feature_alt | strip
+                    assign feature_alt = feature_alt | escape
+                  %}
+                  {{ block.settings.image
+                    | image_url: width: 900
+                    | image_tag:
+                      alt: feature_alt,
+                      loading: 'lazy',
+                      widths: '450, 650, 900'
+                  }}
                 {% else %}
                   {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
                 {% endif %}
@@ -157,7 +177,18 @@
             <figure class="fof-gallery__item" {{ block.shopify_attributes }}>
               <div class="fof-gallery__image">
                 {% if block.settings.image %}
-                  <img src="{{ block.settings.image | image_url: width: 1000 }}" alt="{{ block.settings.caption | escape }}">
+                  {% liquid
+                    assign gallery_alt = block.settings.caption | default: 'Gallery image'
+                    assign gallery_alt = gallery_alt | strip
+                    assign gallery_alt = gallery_alt | escape
+                  %}
+                  {{ block.settings.image
+                    | image_url: width: 1000
+                    | image_tag:
+                      alt: gallery_alt,
+                      loading: 'lazy',
+                      widths: '500, 750, 1000'
+                  }}
                 {% else %}
                   {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
                 {% endif %}
@@ -172,7 +203,13 @@
     </div>
   </section>
 
-  <section class="fof-contact" id="contact">
+  <section
+    class="fof-contact"
+    id="contact"
+    {% if section.settings.contact_background %}
+      style="--fof-contact-bg: url('{{ section.settings.contact_background | image_url: width: 2000 }}');"
+    {% endif %}
+  >
     <div class="fof-shell fof-contact__shell">
       <div class="fof-contact__copy">
         <span class="fof-kicker">{{ section.settings.contact_kicker | default: 'Let’s Talk Trucks' }}</span>
@@ -691,7 +728,7 @@
 
   /* Contact */
   .fof-contact {
-    background: linear-gradient(135deg, rgba(23, 20, 16, 0.9), rgba(38, 34, 30, 0.85)), url('{{ section.settings.contact_background | image_url: width: 2000 }}');
+    background: linear-gradient(135deg, rgba(23, 20, 16, 0.9), rgba(38, 34, 30, 0.85)), var(--fof-contact-bg, none);
     background-size: cover;
     background-position: center;
     color: #fdf8f1;
@@ -1003,8 +1040,7 @@
     {
       "type": "text",
       "id": "hero_kicker",
-      "label": "Hero kicker",
-      "default": ""
+      "label": "Hero kicker"
     },
     {
       "type": "text",
@@ -1015,8 +1051,7 @@
     {
       "type": "textarea",
       "id": "hero_subheading",
-      "label": "Hero subheading",
-      "default": ""
+      "label": "Hero subheading"
     },
     {
       "type": "text",
