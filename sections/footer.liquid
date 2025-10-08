@@ -1,4 +1,4 @@
-<footer class="site-footer">
+<footer class="site-footer full-width">
   <div class="site-footer__shell">
     <div class="site-footer__contact">
       {% if section.settings.heading != blank %}
@@ -71,11 +71,12 @@
   }
 
   .site-footer__shell {
-    width: 100%;
-    margin: 0;
+    width: min(100%, var(--content-width));
+    margin: 0 auto;
     display: grid;
     gap: clamp(32px, 6vw, 48px);
-    padding: clamp(2rem, 4vw, 4rem);
+    padding-block: clamp(2rem, 4vw, 4rem);
+    padding-inline: clamp(var(--page-margin), 6vw, 4rem);
   }
 
   .site-footer__contact h2 {
@@ -157,7 +158,9 @@
   }
 
   .site-footer__meta-shell {
-    padding: 18px clamp(2rem, 4vw, 4rem);
+    width: min(100%, var(--content-width));
+    margin: 0 auto;
+    padding: 18px clamp(var(--page-margin), 5vw, 4rem);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -168,10 +171,6 @@
   }
 
   @media (max-width: 768px) {
-    .site-footer__shell {
-      width: min(100%, calc(100% - 2rem));
-    }
-
     .site-footer__meta-shell {
       flex-direction: column;
       justify-content: center;

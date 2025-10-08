@@ -49,6 +49,44 @@
     },
     "payment": "Accepted payment methods"
   },
+  "sections": {
+    "features": {
+      "title": "Features",
+      "kicker": "Modular By Design",
+      "heading": "Built to evolve with every mile.",
+      "subheading": "Seven hero modules showcase how the system adapts to every build.",
+      "cards": {
+        "1": {
+          "title": "Bolt-Together Core",
+          "description": "Anodized aluminum extrusions connect with serviceable hardware so repairs and upgrades happen without downtime."
+        },
+        "2": {
+          "title": "Integrated Lighting",
+          "description": "Flush-mounted scene lights and DOT signals tuck into protected channels with plug-and-play harnessing."
+        },
+        "3": {
+          "title": "Modular Gear Rails",
+          "description": "Full-perimeter accessory rail accepts MOLLE plates, RTT mounts, and cargo solutions without drilling."
+        },
+        "4": {
+          "title": "Tie-Down Ecosystem",
+          "description": "Adjustable cleats and recessed l-track anchor everything from camp kitchens to worksite payloads."
+        },
+        "5": {
+          "title": "Powder-Coated Armor",
+          "description": "Textured powder coat shrugs off trail rash while sealed seams keep corrosion at bay."
+        },
+        "6": {
+          "title": "Service-Ready Wiring",
+          "description": "Loomed conduits and labeled pass-throughs make electrical upgrades and diagnostics straightforward."
+        },
+        "7": {
+          "title": "Adventure-Proof Storage",
+          "description": "Lockable side boxes and underdeck drawers keep recovery gear organized and dust free."
+        }
+      }
+    }
+  },
   "search": {
     "title": "Search",
     "placeholder": "Search articles, pages, or products",

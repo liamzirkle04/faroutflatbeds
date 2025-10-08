@@ -17,10 +17,17 @@
 
   assign about_heading_primary = section.settings.about_story_heading_primary | default: 'Born from experience'
   assign about_heading_secondary = section.settings.about_story_heading_secondary | default: 'What makes us different'
+  assign about_image = section.settings.about_image
+  assign about_image_alt = section.settings.about_image_alt | default: section.settings.about_heading
+  assign about_image_alt = about_image_alt | strip | escape
 
+  assign metric_blocks = section.blocks | where: 'type', 'about_metric'
   assign story_blocks = section.blocks | where: 'type', 'story_block'
   assign feature_blocks = section.blocks | where: 'type', 'feature_card'
-  assign gallery_blocks = section.blocks | where: 'type', 'gallery_image'
+  assign feature_size_defaults = 'large,medium,medium,small,small,medium,large' | split: ','
+  assign features_kicker_default = 'sections.features.kicker' | t
+  assign features_heading_default = 'sections.features.heading' | t
+  assign features_subheading_default = 'sections.features.subheading' | t
 %}
 
 <div class="fof-page" id="top" data-section-id="{{ section.id }}">
@@ -39,12 +46,41 @@
 
   <section class="fof-about" id="about">
     <div class="fof-shell fof-about__shell">
-      <div class="fof-about__intro">
-        <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
-        <h2>{{ section.settings.about_heading | default: 'Built by enthusiasts, for enthusiasts.' }}</h2>
-        {% if section.settings.about_intro != blank %}
-          <p>{{ section.settings.about_intro }}</p>
+      <div class="fof-about__intro{% if about_image %} fof-about__intro--has-media{% endif %}">
+        {% if about_image %}
+          <div class="fof-about__intro-media">
+            {{ about_image
+              | image_url: width: 1400
+              | image_tag:
+                alt: about_image_alt,
+                loading: 'lazy',
+                widths: '700, 1000, 1400'
+            }}
+          </div>
         {% endif %}
+        <div class="fof-about__intro-content">
+          <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
+          <h2>{{ section.settings.about_heading | default: 'Built by enthusiasts, for enthusiasts.' }}</h2>
+          {% if section.settings.about_intro != blank %}
+            <p>{{ section.settings.about_intro }}</p>
+          {% endif %}
+          {% if metric_blocks.size > 0 %}
+            <div class="fof-about__metrics">
+              {% for block in metric_blocks %}
+                {% assign metric_value = block.settings.value %}
+                {% assign metric_label = block.settings.label %}
+                <div class="fof-about__metric" {{ block.shopify_attributes }}>
+                  {% if metric_value != blank %}
+                    <span class="fof-about__metric-value">{{ metric_value }}</span>
+                  {% endif %}
+                  {% if metric_label != blank %}
+                    <span class="fof-about__metric-label">{{ metric_label }}</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
       </div>
 
       {% if story_blocks.size > 0 %}
@@ -100,86 +136,89 @@
 
   <section class="fof-features" id="features">
     <div class="fof-shell fof-features__shell">
+      <div class="fof-features__title">
+        <h2>{{ 'sections.features.title' | t }}</h2>
+      </div>
       <div class="fof-features__head">
-        <span class="fof-kicker">{{ section.settings.features_kicker | default: 'Modular By Design' }}</span>
-        <h2>{{ section.settings.features_heading | default: 'Built to evolve with every mile.' }}</h2>
-        {% if section.settings.features_subheading != blank %}
-          <p>{{ section.settings.features_subheading }}</p>
+        {% assign features_kicker = section.settings.features_kicker | default: features_kicker_default %}
+        {% assign features_heading = section.settings.features_heading | default: features_heading_default %}
+        {% assign features_subheading = section.settings.features_subheading | default: features_subheading_default %}
+        {% if features_kicker != blank %}
+          <span class="fof-kicker">{{ features_kicker }}</span>
+        {% endif %}
+        <h3 class="fof-features__tagline">{{ features_heading }}</h3>
+        {% if features_subheading != blank %}
+          <p>{{ features_subheading }}</p>
         {% endif %}
       </div>
-      {% if feature_blocks.size > 0 %}
-        <div class="fof-features__grid">
-          {% for block in feature_blocks %}
-            <article class="fof-feature-card" {{ block.shopify_attributes }}>
+      <div class="fof-features__grid">
+        {% assign required_feature_count = 7 %}
+        {% assign rendered_feature_blocks = 0 %}
+        {% for block in feature_blocks limit: required_feature_count %}
+          {% assign rendered_feature_blocks = rendered_feature_blocks | plus: 1 %}
+          {% assign size_index = forloop.index0 %}
+          {% assign fallback_size = feature_size_defaults[size_index] | default: 'medium' %}
+          {% assign fallback_size = fallback_size | downcase %}
+          {% assign card_size = block.settings.size | default: fallback_size %}
+          {% assign card_size = card_size | downcase %}
+          {% unless card_size == 'small' or card_size == 'medium' or card_size == 'large' %}
+            {% assign card_size = fallback_size %}
+          {% endunless %}
+          {% capture title_key %}sections.features.cards.{{ rendered_feature_blocks }}.title{% endcapture %}
+          {% capture description_key %}sections.features.cards.{{ rendered_feature_blocks }}.description{% endcapture %}
+          {% assign default_title = title_key | t %}
+          {% assign default_description = description_key | t %}
+          {% liquid
+            assign feature_alt_source = block.settings.image_alt | default: block.settings.title | default: default_title
+            assign feature_alt = feature_alt_source | strip | escape
+          %}
+          <article class="fof-feature-card fof-feature-card--{{ card_size }}" {{ block.shopify_attributes }}>
+            <div class="fof-feature-card__media">
+              {% if block.settings.image %}
+                {{ block.settings.image
+                  | image_url: width: 900
+                  | image_tag:
+                    alt: feature_alt,
+                    loading: 'lazy',
+                    widths: '450, 650, 900'
+                }}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
+              {% endif %}
+            </div>
+            <div class="fof-feature-card__content">
+              <h3>{{ block.settings.title | default: default_title }}</h3>
+              {% assign feature_description = block.settings.description | default: default_description %}
+              {% if feature_description != blank %}
+                <p>{{ feature_description }}</p>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+        {% assign placeholder_start = rendered_feature_blocks | plus: 1 %}
+        {% if placeholder_start <= required_feature_count %}
+          {% for index in (placeholder_start..required_feature_count) %}
+            {% assign size_index = index | minus: 1 %}
+            {% assign fallback_size = feature_size_defaults[size_index] | default: 'medium' %}
+            {% assign fallback_size = fallback_size | downcase %}
+            {% capture title_key %}sections.features.cards.{{ index }}.title{% endcapture %}
+            {% capture description_key %}sections.features.cards.{{ index }}.description{% endcapture %}
+            {% assign placeholder_title = title_key | t %}
+            {% assign placeholder_description = description_key | t %}
+            <article class="fof-feature-card fof-feature-card--{{ fallback_size }} fof-feature-card--placeholder" data-placeholder-index="{{ index }}">
               <div class="fof-feature-card__media">
-                {% if block.settings.image %}
-                  {% liquid
-                    assign feature_alt = block.settings.image_alt | default: block.settings.title
-                    assign feature_alt = feature_alt | strip
-                    assign feature_alt = feature_alt | escape
-                  %}
-                  {{ block.settings.image
-                    | image_url: width: 900
-                    | image_tag:
-                      alt: feature_alt,
-                      loading: 'lazy',
-                      widths: '450, 650, 900'
-                  }}
-                {% else %}
-                  {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
-                {% endif %}
+                {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
               </div>
               <div class="fof-feature-card__content">
-                <h3>{{ block.settings.title | default: 'Bolt-Together Core' }}</h3>
-                {% if block.settings.description != blank %}
-                  <p>{{ block.settings.description }}</p>
+                <h3>{{ placeholder_title }}</h3>
+                {% if placeholder_description != blank %}
+                  <p>{{ placeholder_description }}</p>
                 {% endif %}
               </div>
             </article>
           {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-  </section>
-
-  <section class="fof-gallery" id="gallery">
-    <div class="fof-shell fof-gallery__shell">
-      <div class="fof-gallery__head">
-        <span class="fof-kicker">{{ section.settings.gallery_kicker | default: 'Real Builds' }}</span>
-        <h2>{{ section.settings.gallery_heading | default: 'Flatbeds in the wild.' }}</h2>
-        {% if section.settings.gallery_subheading != blank %}
-          <p>{{ section.settings.gallery_subheading }}</p>
         {% endif %}
       </div>
-      {% if gallery_blocks.size > 0 %}
-        <div class="fof-gallery__grid">
-          {% for block in gallery_blocks %}
-            <figure class="fof-gallery__item" {{ block.shopify_attributes }}>
-              <div class="fof-gallery__image">
-                {% if block.settings.image %}
-                  {% liquid
-                    assign gallery_alt = block.settings.caption | default: 'Gallery image'
-                    assign gallery_alt = gallery_alt | strip
-                    assign gallery_alt = gallery_alt | escape
-                  %}
-                  {{ block.settings.image
-                    | image_url: width: 1000
-                    | image_tag:
-                      alt: gallery_alt,
-                      loading: 'lazy',
-                      widths: '500, 750, 1000'
-                  }}
-                {% else %}
-                  {{ 'image' | placeholder_svg_tag: 'fof-placeholder' }}
-                {% endif %}
-              </div>
-              {% if block.settings.caption != blank %}
-                <figcaption>{{ block.settings.caption }}</figcaption>
-              {% endif %}
-            </figure>
-          {% endfor %}
-        </div>
-      {% endif %}
     </div>
   </section>
 
@@ -344,22 +383,74 @@
   }
 
   .fof-about__intro {
-    max-width: 700px;
     display: grid;
-    gap: 18px;
-    margin-bottom: 48px;
+    gap: clamp(24px, 5vw, 40px);
+    margin-bottom: clamp(48px, 8vw, 72px);
+    padding: clamp(24px, 5vw, 40px);
+    border-radius: 36px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 24px 48px rgba(23, 20, 16, 0.14);
   }
 
-  .fof-about__intro h2 {
+  .fof-about__intro--has-media {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .fof-about__intro-media {
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 26px 44px rgba(23, 20, 16, 0.18);
+  }
+
+  .fof-about__intro-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .fof-about__intro-content {
+    display: grid;
+    gap: 20px;
+    max-width: 620px;
+  }
+
+  .fof-about__intro-content h2 {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3rem);
   }
 
-  .fof-about__intro p {
+  .fof-about__intro-content p {
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.7;
     color: rgba(31, 27, 23, 0.78);
+  }
+
+  .fof-about__metrics {
+    display: grid;
+    grid-auto-flow: column;
+    gap: clamp(16px, 4vw, 40px);
+    align-items: start;
+  }
+
+  .fof-about__metric {
+    display: grid;
+    gap: 6px;
+  }
+
+  .fof-about__metric-value {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .fof-about__metric-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    color: rgba(31, 27, 23, 0.65);
   }
 
   .fof-about__stories {
@@ -425,7 +516,22 @@
 
   /* Features */
   .fof-features {
-    padding: 0;
+    margin-top: clamp(48px, 8vw, 96px);
+    padding: clamp(72px, 10vw, 128px) 0;
+    background: #f5f1eb;
+  }
+
+  .fof-features__shell {
+    display: grid;
+    gap: clamp(32px, 6vw, 64px);
+  }
+
+  .fof-features__title h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(31, 27, 23, 0.72);
   }
 
   .fof-features__head {
@@ -434,9 +540,14 @@
     max-width: 640px;
   }
 
-  .fof-features__head h2 {
+  .fof-features__head h3 {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3rem);
+    color: #1f1b17;
+  }
+
+  .fof-features__tagline {
+    font-weight: 600;
   }
 
   .fof-features__head p {
@@ -449,7 +560,9 @@
     margin-top: 48px;
     display: grid;
     gap: 24px;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-rows: minmax(140px, auto);
+    grid-auto-flow: dense;
   }
 
   .fof-feature-card {
@@ -457,13 +570,46 @@
     border-radius: 24px;
     overflow: hidden;
     display: grid;
-    gap: 0;
+    grid-template-rows: auto 1fr;
     box-shadow: 0 22px 40px rgba(23, 20, 16, 0.12);
+    grid-column: span 3;
+    grid-row: span 2;
   }
 
-  .fof-feature-card__media img {
+  .fof-feature-card--small {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .fof-feature-card--medium {
+    grid-column: span 3;
+    grid-row: span 2;
+  }
+
+  .fof-feature-card--large {
+    grid-column: span 4;
+    grid-row: span 3;
+  }
+
+  .fof-feature-card--placeholder svg {
+    height: 100%;
     width: 100%;
-    display: block;
+    object-fit: cover;
+  }
+
+  .fof-feature-card__media {
+    position: relative;
+    padding-bottom: 60%;
+    overflow: hidden;
+  }
+
+  .fof-feature-card__media img,
+  .fof-feature-card__media svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .fof-feature-card__content {
@@ -483,55 +629,23 @@
     line-height: 1.5;
   }
 
-  /* Gallery */
-  .fof-gallery__head {
-    display: grid;
-    gap: 18px;
-    max-width: 640px;
-  }
+  @media (max-width: 900px) {
+    .fof-features__grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-auto-rows: auto;
+    }
 
-  .fof-gallery__head h2 {
-    margin: 0;
-    font-size: clamp(2rem, 5vw, 3rem);
-  }
+    .fof-feature-card,
+    .fof-feature-card--small,
+    .fof-feature-card--medium,
+    .fof-feature-card--large {
+      grid-column: auto;
+      grid-row: auto;
+    }
 
-  .fof-gallery__head p {
-    margin: 0;
-    line-height: 1.6;
-    color: rgba(31, 27, 23, 0.75);
-  }
-
-  .fof-gallery__grid {
-    margin-top: 48px;
-    display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  }
-
-  .fof-gallery__item {
-    display: grid;
-    gap: 12px;
-  }
-
-  .fof-gallery__image {
-    position: relative;
-    padding-bottom: 65%;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 18px 30px rgba(23, 20, 16, 0.12);
-  }
-
-  .fof-gallery__image img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .fof-gallery__item figcaption {
-    font-size: 0.95rem;
-    color: rgba(31, 27, 23, 0.7);
+    .fof-feature-card__media {
+      padding-bottom: 56%;
+    }
   }
 
   /* Contact */
@@ -667,6 +781,14 @@
       gap: 72px;
     }
 
+    .fof-about__intro {
+      grid-template-columns: 1fr;
+    }
+
+    .fof-about__metrics {
+      grid-auto-flow: row;
+    }
+
     .fof-hero__headline {
       letter-spacing: 0.1em;
     }
@@ -689,9 +811,6 @@
       order: 0;
     }
 
-    .fof-gallery__image {
-      padding-bottom: 70%;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -740,6 +859,16 @@
       "default": "We set out to create a flatbed system that works as hard as you do — light enough to go anywhere, strong enough to haul anything, and modular enough to evolve with every build."
     },
     {
+      "type": "image_picker",
+      "id": "about_image",
+      "label": "About image"
+    },
+    {
+      "type": "text",
+      "id": "about_image_alt",
+      "label": "About image alt text"
+    },
+    {
       "type": "text",
       "id": "about_story_heading_primary",
       "label": "Primary story heading",
@@ -768,23 +897,6 @@
       "id": "features_subheading",
       "label": "Features subheading",
       "default": "Every Far Out Flatbed is a platform for accessories, storage, and future upgrades. Swap modules, add gear, and tune your rig for work or play."
-    },
-    {
-      "type": "text",
-      "id": "gallery_kicker",
-      "label": "Gallery kicker",
-      "default": "Real Builds"
-    },
-    {
-      "type": "text",
-      "id": "gallery_heading",
-      "label": "Gallery heading",
-      "default": "Flatbeds in the wild."
-    },
-    {
-      "type": "textarea",
-      "id": "gallery_subheading",
-      "label": "Gallery subheading"
     },
     {
       "type": "image_picker",
@@ -818,6 +930,24 @@
   ],
   "blocks": [
     {
+      "type": "about_metric",
+      "name": "About metric",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "5+"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Years industry experience"
+        }
+      ]
+    },
+    {
       "type": "story_block",
       "name": "About story",
       "settings": [
@@ -848,6 +978,26 @@
           "type": "text",
           "id": "image_alt",
           "label": "Image alt text"
+        },
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Card size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
         }
       ]
     },
@@ -878,27 +1028,34 @@
           "label": "Image alt text"
         }
       ]
-    },
-    {
-      "type": "gallery_image",
-      "name": "Gallery image",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image"
-        },
-        {
-          "type": "text",
-          "id": "caption",
-          "label": "Caption"
-        }
-      ]
     }
   ],
   "presets": [
     {
-      "name": "Far Out Landing"
+      "name": "Far Out Landing",
+      "blocks": [
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        },
+        {
+          "type": "feature_card"
+        }
+      ]
     }
   ]
 }
