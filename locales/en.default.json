@@ -50,6 +50,11 @@
     "payment": "Accepted payment methods"
   },
   "sections": {
+    "about": {
+      "title": "FAR OUT FLATBEDS",
+      "subtitle": "Born From Experience",
+      "description": "I've been into trucks and off-roading pretty much my whole life. For the last five years I've worked in the off-road industry, which gave me a front row seat to how this space has grown and where it's heading. The biggest thing I have taken away is the idea that we can build cool, well-thought-out stuff right here in the U.S., and do it in a way that actually makes sense for the people using it. That's where the idea for Far Out Flatbeds was born. By using extruded aluminum as the backbone of the bed, we're able to create a platform that's both strong and incredibly versatile. The goal is modularity — a bed that adapts to you, your truck, and your lifestyle.\n\nFar Out Flatbeds isn't just about building truck beds — it's about rethinking what a flatbed can be. A product designed by enthusiasts, for enthusiasts, with innovation, practicality, and style at its core."
+    },
     "features": {
       "title": "Features",
       "kicker": "Modular By Design",
@@ -57,7 +62,7 @@
       "subheading": "Seven hero modules showcase how the system adapts to every build.",
       "cards": {
         "1": {
-          "title": "Bolt-Together Core",
+          "title": "Bolt-Together Design",
           "description": "Anodized aluminum extrusions connect with serviceable hardware so repairs and upgrades happen without downtime."
         },
         "2": {
@@ -65,26 +70,34 @@
           "description": "Flush-mounted scene lights and DOT signals tuck into protected channels with plug-and-play harnessing."
         },
         "3": {
-          "title": "Modular Gear Rails",
-          "description": "Full-perimeter accessory rail accepts MOLLE plates, RTT mounts, and cargo solutions without drilling."
+          "title": "Powder-Coated Armor",
+          "description": "Textured powder coat shrugs off trail rash while sealed seams keep corrosion at bay."
         },
         "4": {
           "title": "Tie-Down Ecosystem",
           "description": "Adjustable cleats and recessed l-track anchor everything from camp kitchens to worksite payloads."
         },
         "5": {
-          "title": "Powder-Coated Armor",
-          "description": "Textured powder coat shrugs off trail rash while sealed seams keep corrosion at bay."
+          "title": "Modular Gear Rails",
+          "description": "Full-perimeter accessory rail accepts MOLLE plates, RTT mounts, and cargo solutions without drilling."
         },
         "6": {
           "title": "Service-Ready Wiring",
           "description": "Loomed conduits and labeled pass-throughs make electrical upgrades and diagnostics straightforward."
         },
         "7": {
-          "title": "Adventure-Proof Storage",
-          "description": "Lockable side boxes and underdeck drawers keep recovery gear organized and dust free."
+          "title": "Future-Proof Corners",
+          "description": "Corner mounting plates accept add-on accessories—from recovery boards to camp tables—without drilling."
         }
       }
+    },
+    "landing_product": {
+      "title": "Ready to build yours?",
+      "body": "Lock in the first production run of the Far Out Flatbed. We’ll confirm fitment details after checkout and keep you updated as your build progresses.",
+      "button": "Add To Cart",
+      "sold_out": "Sold Out",
+      "select_variant": "Select configuration",
+      "quantity_label": "Quantity"
     }
   },
   "search": {
