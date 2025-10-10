@@ -17,7 +17,8 @@
     </div>
 
     <nav class="site-footer__menu" aria-label="{{ 'general.accessibility.footer_menu' | t }}">
-      {% assign nav_items = 'about:About,features:Features,contact:Contact' | split: ',' %}
+      <h2 class="site-footer__menu-title">{{ 'quick_links.title' | t }}</h2>
+      {% assign nav_items = 'about:About,features:Features,shop:Shop,contact:Contact' | split: ',' %}
       <ul>
         {% for item in nav_items %}
           {% assign parts = item | split: ':' %}
@@ -27,6 +28,20 @@
         {% endfor %}
       </ul>
     </nav>
+
+    <div class="site-footer__social-static" aria-label="{{ 'general.accessibility.social_media' | t }}">
+      <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram" class="site-footer__social-link">
+        <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5zm6.25-3.75a1.25 1.25 0 1 1-1.25 1.25 1.25 1.25 0 0 1 1.25-1.25z" />
+        </svg>
+      </a>
+
+      <a href="https://www.tiktok.com/" target="_blank" rel="noopener" aria-label="TikTok" class="site-footer__social-link">
+        <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+          <path d="M15 2a4 4 0 0 0 4 4V9a7 7 0 0 1-4-1.34V15a5 5 0 1 1-5-5 5.06 5.06 0 0 1 1 .1V12a3 3 0 1 0 2 2.83V2z" />
+        </svg>
+      </a>
+    </div>
 
     {% if section.blocks.size > 0 %}
       <div class="site-footer__social" aria-label="{{ 'general.accessibility.social_media' | t }}">
@@ -66,7 +81,7 @@
 
 {% stylesheet %}
   .site-footer {
-    background-color: #1f1b17;
+    background-color: #2a241e;
     color: #f5f1ea;
   }
 
@@ -74,9 +89,11 @@
     width: min(100%, var(--content-width));
     margin: 0 auto;
     display: grid;
-    gap: clamp(32px, 6vw, 48px);
-    padding-block: clamp(2rem, 4vw, 4rem);
+    gap: clamp(24px, 5vw, 32px);
+    padding-block: clamp(1rem, 2vw, 2rem);
     padding-inline: clamp(var(--page-margin), 6vw, 4rem);
+    align-items: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .site-footer__contact h2 {
@@ -109,7 +126,6 @@
     color: rgba(245, 241, 234, 0.78);
   }
 
-  .site-footer__menu ul,
   .site-footer__social ul {
     list-style: none;
     display: flex;
@@ -125,9 +141,62 @@
     letter-spacing: 0.04em;
   }
 
+  .site-footer__menu {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.75rem;
+  }
+
+  .site-footer__menu-title {
+    margin: 0;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .site-footer__menu ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-footer__social-static {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+  }
+
   .site-footer__menu a:hover,
   .site-footer__menu a:focus-visible {
     text-decoration: underline;
+  }
+
+  .site-footer__social-link {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 241, 234, 0.1);
+    transition: background-color 0.2s ease;
+  }
+
+  .site-footer__social-link svg {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+  }
+
+  .site-footer__social-link:hover,
+  .site-footer__social-link:focus-visible {
+    background: rgba(245, 241, 234, 0.2);
   }
 
   .site-footer__social a {
@@ -154,7 +223,7 @@
 
   .site-footer__meta {
     border-top: 1px solid rgba(245, 241, 234, 0.12);
-    margin-top: clamp(24px, 5vw, 48px);
+    margin-top: clamp(12px, 3vw, 24px);
   }
 
   .site-footer__meta-shell {

@@ -58,7 +58,7 @@
     "features": {
       "title": "Features",
       "kicker": "Modular By Design",
-      "heading": "Built to evolve with every mile.",
+      "heading": "Built to Evolve",
       "subheading": "Seven hero modules showcase how the system adapts to every build.",
       "cards": {
         "1": {
@@ -106,6 +106,12 @@
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
     "results_for_html": "{{ count }} results found for {{ terms }}"
+  },
+  "quick_links": {
+    "title": "Quick Links"
+  },
+  "landing_product": {
+    "placeholder_cta": "Build My Flatbed"
   },
   "templates": {
     "contact": {
