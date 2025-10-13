@@ -1,6 +1,12 @@
 <header class="header">
   <a href="{{ routes.root_url }}" class="header__brand-icon" aria-label="{{ shop.name }}">
-    {{ 'ICON BLACK.png' | asset_url | img_tag: shop.name, 'header__brand-image' }}
+    <img
+      src="{{ 'ICON BLACK.png' | asset_url }}"
+      alt="{{ shop.name }}"
+      class="header__brand-image"
+      width="2001"
+      height="556"
+    >
   </a>
 
   <nav class="header__menu" aria-label="Primary">

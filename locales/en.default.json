@@ -47,7 +47,15 @@
       "footer_menu": "Footer navigation",
       "social_media": "Social media links"
     },
-    "payment": "Accepted payment methods"
+    "payment": "Accepted payment methods",
+    "cart": {
+      "title": "Cart"
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "Account"
+    }
   },
   "sections": {
     "about": {
@@ -94,10 +102,12 @@
     "landing_product": {
       "title": "Ready to build yours?",
       "body": "Lock in the first production run of the Far Out Flatbed. We’ll confirm fitment details after checkout and keep you updated as your build progresses.",
-      "button": "Add To Cart",
+      "button": "Shop Now",
       "sold_out": "Sold Out",
       "select_variant": "Select configuration",
-      "quantity_label": "Quantity"
+      "quantity_label": "Quantity",
+      "placeholder_title": "Select a product",
+      "placeholder_body": "Choose a product to finish configuring this card."
     }
   },
   "search": {

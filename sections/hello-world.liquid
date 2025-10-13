@@ -20,6 +20,9 @@
   assign about_image = section.settings.about_image
   assign about_image_alt = section.settings.about_image_alt | default: section.settings.about_heading
   assign about_image_alt = about_image_alt | strip | escape
+  assign about_narrative_image = section.settings.about_narrative_image
+  assign about_narrative_image_alt = section.settings.about_narrative_image_alt | default: about_heading_secondary
+  assign about_narrative_image_alt = about_narrative_image_alt | strip | escape
 
   assign metric_blocks = section.blocks | where: 'type', 'about_metric'
   assign story_blocks = section.blocks | where: 'type', 'story_block'
@@ -33,6 +36,26 @@
   if featured_product_handle != blank
     assign landing_product = all_products[featured_product_handle]
   endif
+  assign landing_product_secondary_handle = section.settings.landing_product_secondary
+  assign landing_product_tertiary_handle = section.settings.landing_product_tertiary
+  assign landing_product_handles_raw = ''
+  if featured_product_handle != blank
+    assign landing_product_handles_raw = landing_product_handles_raw | append: featured_product_handle | append: '|'
+  endif
+  if landing_product_secondary_handle != blank
+    assign landing_product_handles_raw = landing_product_handles_raw | append: landing_product_secondary_handle | append: '|'
+  endif
+  if landing_product_tertiary_handle != blank
+    assign landing_product_handles_raw = landing_product_handles_raw | append: landing_product_tertiary_handle | append: '|'
+  endif
+  assign landing_product_handles = landing_product_handles_raw | split: '|'
+  assign landing_product_count = 0
+  for handle in landing_product_handles
+    assign handle_clean = handle | strip
+    if handle_clean != blank
+      assign landing_product_count = landing_product_count | plus: 1
+    endif
+  endfor
   assign landing_product_title_default = 'sections.landing_product.title' | t
   assign landing_product_body_default = 'sections.landing_product.body' | t
   assign landing_product_button_default = 'sections.landing_product.button' | t
@@ -71,45 +94,54 @@
           assign about_intro_text = section.settings.about_intro | default: about_intro_default
           assign about_intro_paragraphs = about_intro_text | split: '\n\n'
         %}
-        <div class="fof-about__intro{% if about_image %} fof-about__intro--has-media{% endif %}">
-          {% if about_image %}
-            <div class="fof-about__intro-media">
+        <div class="fof-about__intro fof-about__intro--has-media">
+          <div class="fof-about__intro-media">
+            {% if about_image %}
               {{ about_image
                 | image_url: width: 1400
                 | image_tag:
-                alt: about_image_alt,
-                loading: 'lazy',
-                widths: '700, 1000, 1400'
-            }}
-          </div>
-        {% endif %}
-        <div class="fof-about__intro-content">
-          <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
-          <h2>{{ about_heading_text }}</h2>
-          {% for paragraph in about_intro_paragraphs %}
-            {% assign paragraph_clean = paragraph | strip %}
-            {% if paragraph_clean != blank %}
-              <p>{{ paragraph_clean }}</p>
+                  alt: about_image_alt,
+                  loading: 'lazy',
+                  widths: '700, 1000, 1400'
+              }}
+            {% else %}
+              <img
+                src="{{ 'GFCopen2.jpg' | asset_url }}"
+                alt="{{ about_image_alt }}"
+                width="4672"
+                height="7008"
+                loading="lazy"
+                class="fof-about__intro-media-fallback"
+              >
             {% endif %}
-          {% endfor %}
-          {% if metric_blocks.size > 0 %}
-            <div class="fof-about__metrics">
-              {% for block in metric_blocks %}
-                {% assign metric_value = block.settings.value %}
-                {% assign metric_label = block.settings.label %}
-                <div class="fof-about__metric" {{ block.shopify_attributes }}>
-                  {% if metric_value != blank %}
-                    <span class="fof-about__metric-value">{{ metric_value }}</span>
-                  {% endif %}
-                  {% if metric_label != blank %}
-                    <span class="fof-about__metric-label">{{ metric_label }}</span>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
+          </div>
+          <div class="fof-about__intro-content">
+            <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
+            <h2>{{ about_heading_text }}</h2>
+            {% for paragraph in about_intro_paragraphs %}
+              {% assign paragraph_clean = paragraph | strip %}
+              {% if paragraph_clean != blank %}
+                <p>{{ paragraph_clean }}</p>
+              {% endif %}
+            {% endfor %}
+            {% if metric_blocks.size > 0 %}
+              <div class="fof-about__metrics">
+                {% for block in metric_blocks %}
+                  {% assign metric_value = block.settings.value %}
+                  {% assign metric_label = block.settings.label %}
+                  <div class="fof-about__metric" {{ block.shopify_attributes }}>
+                    {% if metric_value != blank %}
+                      <span class="fof-about__metric-value">{{ metric_value }}</span>
+                    {% endif %}
+                    {% if metric_label != blank %}
+                      <span class="fof-about__metric-label">{{ metric_label }}</span>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
         </div>
-      </div>
 
       {% if story_blocks.size > 0 %}
         <div class="fof-about__stories">
@@ -161,23 +193,165 @@
       {% endif %}
 
       <div class="fof-about__narrative">
-        <div class="fof-about__narrative-head">
-          <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
-          <h2>{{ about_heading_text }}</h2>
+        <div class="fof-about__narrative-content">
+          <div class="fof-about__narrative-head">
+            <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
+            <h2>{{ about_heading_text }}</h2>
+          </div>
+          <div class="fof-about__narrative-columns">
+            {% for paragraph in about_intro_paragraphs limit: 2 %}
+              {% assign paragraph_clean = paragraph | strip %}
+              {% if paragraph_clean != blank %}
+                <p>{{ paragraph_clean }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
         </div>
-        <div class="fof-about__narrative-columns">
-          {% for paragraph in about_intro_paragraphs limit: 2 %}
-            {% assign paragraph_clean = paragraph | strip %}
-            {% if paragraph_clean != blank %}
-              <p>{{ paragraph_clean }}</p>
-            {% endif %}
-          {% endfor %}
+        <div class="fof-about__narrative-media">
+          {% if about_narrative_image %}
+            {{ about_narrative_image
+              | image_url: width: 1400
+              | image_tag:
+                alt: about_narrative_image_alt,
+                loading: 'lazy',
+                widths: '700, 1000, 1400'
+            }}
+          {% else %}
+            <img
+              src="{{ 'GFCfar.jpg' | asset_url }}"
+              alt="{{ about_narrative_image_alt }}"
+              width="4672"
+              height="7008"
+              loading="lazy"
+              class="fof-about__narrative-media-fallback"
+            >
+          {% endif %}
         </div>
       </div>
     </div>
   </section>
 
-  {% if landing_product %}
+  {% if landing_product_count > 0 %}
+    {% liquid
+      assign landing_product_title = section.settings.landing_product_title | default: landing_product_title_default
+      assign landing_product_body = section.settings.landing_product_body | default: landing_product_body_default
+      assign landing_product_button = section.settings.landing_product_button | default: landing_product_button_default
+      assign landing_product_body_paragraphs = landing_product_body | split: '\n\n'
+    %}
+    <section class="fof-product fof-product--multi" id="shop">
+      <div class="fof-shell fof-product__shell">
+        <div class="fof-product__intro">
+          <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
+          <h2>{{ landing_product_title }}</h2>
+          {% if landing_product_body != blank %}
+            <div class="fof-product__description">
+              {% for paragraph in landing_product_body_paragraphs %}
+                {% assign paragraph_clean = paragraph | strip %}
+                {% if paragraph_clean != blank %}
+                  <p>{{ paragraph_clean }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="fof-product-grid">
+          {% for handle in landing_product_handles limit: 3 %}
+            {% assign handle_clean = handle | strip %}
+            {% if handle_clean == blank %}
+              {% continue %}
+            {% endif %}
+            {% assign card_product = all_products[handle_clean] %}
+            {% assign card_image = nil %}
+            {% assign card_image_alt = nil %}
+            {% assign has_compare_price = false %}
+            {% if card_product %}
+              {% if card_product.featured_image %}
+                {% assign card_image = card_product.featured_image %}
+                {% assign card_image_alt = card_image.alt | default: card_product.title %}
+              {% endif %}
+              {% assign card_excerpt = card_product.description | strip_html | truncatewords: 30 %}
+              {% assign card_price = card_product.price | money %}
+              {% if card_product.compare_at_price_max > card_product.price %}
+                {% assign has_compare_price = true %}
+              {% endif %}
+            {% else %}
+              {% assign card_excerpt = 'sections.landing_product.placeholder_body' | t %}
+              {% assign card_price = '' %}
+              {% assign has_compare_price = false %}
+            {% endif %}
+            {% assign card_image_alt = card_image_alt | default: 'sections.landing_product.placeholder_title' | t %}
+            {% assign card_image_alt_clean = card_image_alt | strip | escape %}
+            <article class="fof-product-card">
+              {% if card_product %}
+                <a href="{{ card_product.url }}" class="fof-product-card__media">
+                  {% if card_image %}
+                    {{ card_image
+                      | image_url: width: 1200
+                      | image_tag:
+                        alt: card_image_alt_clean,
+                        loading: 'lazy',
+                        widths: '600, 900, 1200'
+                    }}
+                  {% else %}
+                    <img
+                      src="{{ 'GFCopen2.jpg' | asset_url }}"
+                      alt="{{ card_image_alt_clean }}"
+                      width="4672"
+                      height="7008"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                </a>
+              {% else %}
+                <div class="fof-product-card__media">
+                  <img
+                    src="{{ 'GFCopen2.jpg' | asset_url }}"
+                    alt="{{ card_image_alt_clean }}"
+                    width="4672"
+                    height="7008"
+                    loading="lazy"
+                  >
+                </div>
+              {% endif %}
+              <div class="fof-product-card__content">
+                {% if card_product %}
+                  <h3>
+                    <a href="{{ card_product.url }}">{{ card_product.title }}</a>
+                  </h3>
+                {% else %}
+                  <h3>{{ 'sections.landing_product.placeholder_title' | t }}</h3>
+                {% endif %}
+                {% if card_excerpt != blank %}
+                  <p class="fof-product-card__excerpt">{{ card_excerpt }}</p>
+                {% endif %}
+                <div class="fof-product-card__meta">
+                  {% if card_product %}
+                    <div class="fof-product-card__price">
+                      {{ card_price }}
+                      {% if has_compare_price %}
+                        <span class="fof-product__price--compare">
+                          {{ card_product.compare_at_price_max | money }}
+                        </span>
+                      {% endif %}
+                    </div>
+                    {% if card_product.available %}
+                      <a href="{{ card_product.url }}" class="fof-product-card__button">
+                        {{ landing_product_button }}
+                      </a>
+                    {% else %}
+                      <span class="fof-product-card__status">{{ landing_product_sold_out_default }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="fof-product-card__status">{{ 'sections.landing_product.placeholder_body' | t }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% elsif landing_product %}
     {% liquid
       assign landing_product_title = section.settings.landing_product_title | default: landing_product_title_default
       assign landing_product_body = section.settings.landing_product_body | default: landing_product_body_default
@@ -185,7 +359,7 @@
       assign landing_product_body_paragraphs = landing_product_body | split: '\n\n'
       assign product_image_setting = section.settings.landing_product_image
       assign product_image_alt = section.settings.landing_product_image_alt | default: landing_product.title
-      assign use_asset_fallback = false
+      assign product_image_fallback = blank
 
       if product_image_setting != blank
         assign product_image = product_image_setting
@@ -194,13 +368,13 @@
         assign product_image_alt = product_image.alt | default: product_image_alt
       else
         assign product_image = nil
-        assign use_asset_fallback = true
+        assign product_image_fallback = 'GFCopen2.jpg'
       endif
 
       assign product_image_alt = product_image_alt | strip | escape
       assign primary_variant = landing_product.selected_or_first_available_variant
     %}
-    <section class="fof-product" id="order">
+    <section class="fof-product" id="shop">
       <div class="fof-shell fof-product__shell">
         <div class="fof-product__media">
           {% if product_image %}
@@ -211,10 +385,12 @@
                 loading: 'lazy',
                 widths: '900, 1200, 1800'
             }}
-          {% elsif use_asset_fallback %}
+          {% elsif product_image_fallback != blank %}
             <img
-              src="{{ 'GFCopen2.jpg' | asset_url }}"
+              src="{{ product_image_fallback | asset_url }}"
               alt="{{ product_image_alt }}"
+              width="4672"
+              height="7008"
               loading="lazy"
             >
           {% else %}
@@ -307,8 +483,6 @@
       <div class="fof-features__grid">
         {% assign required_feature_count = 7 %}
         {% assign rendered_feature_blocks = 0 %}
-        {% assign feature_fallback_images = 'DI3.jpg|DRL.jpg|Driveway instal.jpg|FrontwGFC.jpg|GFC Side.jpg|GFCfar.jpg|GFCopen2.jpg|GasStation.jpg' | split: '|' %}
-        {% assign feature_fallback_images_count = feature_fallback_images | size %}
         {% for block in feature_blocks limit: required_feature_count %}
           {% assign rendered_feature_blocks = rendered_feature_blocks | plus: 1 %}
           {% assign size_index = forloop.index0 %}
@@ -324,14 +498,7 @@
           {% assign default_title = title_key | t %}
           {% assign default_description = description_key | t %}
           {% liquid
-            assign feature_alt_source = block.settings.image_alt | default: block.settings.title | default: default_title
-            assign feature_alt = feature_alt_source | strip | escape
             assign slot_class = rendered_feature_blocks | prepend: 'fof-feature-card--slot-'
-            assign fallback_image_index = 0
-            if feature_fallback_images_count > 0
-              assign fallback_image_index = forloop.index0 | modulo: feature_fallback_images_count
-            endif
-            assign fallback_image_name = feature_fallback_images[fallback_image_index] | strip
           %}
           <article
             class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
@@ -357,11 +524,6 @@
             {% assign placeholder_title = title_key | t %}
             {% assign placeholder_description = description_key | t %}
             {% assign slot_class = index | prepend: 'fof-feature-card--slot-' %}
-            {% assign placeholder_fallback_index = 0 %}
-            {% if feature_fallback_images_count > 0 %}
-              {% assign placeholder_fallback_index = size_index | modulo: feature_fallback_images_count %}
-            {% endif %}
-            {% assign placeholder_fallback_image = feature_fallback_images[placeholder_fallback_index] | strip %}
             <article
               class="fof-feature-card fof-feature-card--{{ fallback_size }} fof-feature-card--placeholder {{ slot_class }}"
               data-placeholder-index="{{ index }}"
@@ -596,32 +758,18 @@
     display: grid;
     gap: clamp(20px, 3.5vw, 32px);
     margin: 0 auto clamp(24px, 5vw, 40px);
-    padding: var(--fof-about-card-padding);
-    border-radius: 36px;
-    background: rgba(255, 255, 255, 0.68);
-    box-shadow: 0 24px 48px rgba(23, 20, 16, 0.14);
     max-width: min(940px, 90%);
   }
 
-  @media (min-width: 900px) {
-    .fof-about__intro {
-      margin-right: 0;
-      margin-left: auto;
-    }
-
-    .fof-about__narrative {
-      margin-left: 0;
-      margin-right: 0;
-      justify-self: start;
-      max-width: min(720px, 70%);
-      width: calc(100% + clamp(1.5rem, 4vw, 4rem));
-      margin-left: calc(-1 * clamp(1.5rem, 4vw, 4rem));
-    }
+  .fof-about__intro--has-media {
+    gap: clamp(24px, 4vw, 48px);
   }
 
-  .fof-about__intro--has-media {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    align-items: center;
+  @media (min-width: 900px) {
+    .fof-about__intro--has-media {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      align-items: center;
+    }
   }
 
   .fof-about__intro-media {
@@ -637,6 +785,11 @@
     display: block;
   }
 
+  .fof-about__intro-media-fallback {
+    width: 100%;
+    height: auto;
+  }
+
   .fof-about__intro-content {
     display: grid;
     gap: clamp(18px, 3vw, 28px);
@@ -646,24 +799,33 @@
   .fof-about__intro-content h2 {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3rem);
+    color: #f5f1ea;
   }
 
   .fof-about__intro-content p {
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(31, 27, 23, 0.78);
+    color: rgba(245, 241, 234, 0.88);
   }
 
   .fof-about__narrative {
     display: grid;
     gap: clamp(24px, 4vw, 48px);
-    padding: var(--fof-about-card-padding);
-    border-radius: 36px;
-    background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 20px 44px rgba(23, 20, 16, 0.12);
-    max-width: min(900px, 90%);
-    margin: 0 auto;
+    max-width: min(1100px, 95%);
+    margin: 0 auto clamp(32px, 5vw, 60px);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .fof-about__narrative {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+  }
+
+  .fof-about__narrative-content {
+    display: grid;
+    gap: clamp(20px, 4vw, 36px);
   }
 
   .fof-about__narrative-head {
@@ -674,6 +836,7 @@
   .fof-about__narrative-head h2 {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3rem);
+    color: #f5f1ea;
   }
 
   .fof-about__narrative-columns {
@@ -686,7 +849,53 @@
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(31, 27, 23, 0.8);
+    color: rgba(245, 241, 234, 0.88);
+  }
+
+  .fof-about__narrative-media {
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 26px 44px rgba(23, 20, 16, 0.18);
+  }
+
+  .fof-about__narrative-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .fof-about__narrative-media-fallback {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (min-width: 900px) {
+    .fof-about__intro-media {
+      justify-self: start;
+    }
+
+    .fof-about__intro-content {
+      justify-self: stretch;
+    }
+
+    .fof-about__narrative-content {
+      justify-self: stretch;
+    }
+
+    .fof-about__narrative-media {
+      justify-self: end;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .fof-about__intro-media {
+      transform: translateX(-4%);
+    }
+
+    .fof-about__narrative-media {
+      transform: translateX(4%);
+    }
   }
 
   .fof-about__metrics {
@@ -926,6 +1135,123 @@
   .fof-product__submit--placeholder:hover {
     background: #1f1b17;
     color: #f5f1ea;
+  }
+
+  .fof-product--multi {
+    min-height: auto;
+    padding-bottom: clamp(42px, 6vw, 72px);
+  }
+
+  .fof-product--multi .fof-product__shell {
+    grid-template-columns: 1fr;
+  }
+
+  .fof-product__intro {
+    display: grid;
+    gap: clamp(18px, 4vw, 28px);
+    max-width: 720px;
+  }
+
+  .fof-product-grid {
+    display: grid;
+    gap: clamp(24px, 5vw, 36px);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .fof-product-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 28px rgba(23, 20, 16, 0.08);
+  }
+
+  .fof-product-card__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    background: rgba(31, 27, 23, 0.04);
+  }
+
+  .fof-product-card__media img,
+  .fof-product-card__media svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .fof-product-card__content {
+    display: grid;
+    gap: 16px;
+    padding: clamp(20px, 4vw, 26px);
+  }
+
+  .fof-product-card__content h3 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  .fof-product-card__excerpt {
+    margin: 0;
+    color: rgba(31, 27, 23, 0.75);
+    line-height: 1.6;
+    font-size: 0.98rem;
+  }
+
+  .fof-product-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fof-product-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .fof-product-card__placeholder {
+    margin: 0;
+    color: rgba(31, 27, 23, 0.6);
+    font-size: 0.95rem;
+  }
+
+  .fof-product-card__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    background: #1f1b17;
+    color: #f5f1ea;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    transition: background 180ms ease, transform 180ms ease;
+  }
+
+  .fof-product-card__button:hover {
+    background: #2d2721;
+    transform: translateY(-1px);
+  }
+
+  .fof-product-card__status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(31, 27, 23, 0.65);
   }
 
   @media (max-width: 1000px) {
@@ -1385,9 +1711,29 @@
       "label": "About image alt text"
     },
     {
+      "type": "image_picker",
+      "id": "about_narrative_image",
+      "label": "Secondary about image"
+    },
+    {
+      "type": "text",
+      "id": "about_narrative_image_alt",
+      "label": "Secondary about image alt text"
+    },
+    {
       "type": "product",
       "id": "featured_product",
       "label": "Featured product"
+    },
+    {
+      "type": "product",
+      "id": "landing_product_secondary",
+      "label": "Second shop product"
+    },
+    {
+      "type": "product",
+      "id": "landing_product_tertiary",
+      "label": "Third shop product"
     },
     {
       "type": "image_picker",
@@ -1415,7 +1761,7 @@
       "type": "text",
       "id": "landing_product_button",
       "label": "Product button label",
-      "default": "Add To Cart"
+      "default": "Shop Now"
     },
     {
       "type": "text",
