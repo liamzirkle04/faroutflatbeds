@@ -23,6 +23,43 @@
   assign about_narrative_image = section.settings.about_narrative_image
   assign about_narrative_image_alt = section.settings.about_narrative_image_alt | default: about_heading_secondary
   assign about_narrative_image_alt = about_narrative_image_alt | strip | escape
+  assign about_heading_default = 'sections.about.subtitle' | t
+  assign about_intro_primary = 'sections.about.description' | t
+  assign about_intro_secondary = 'sections.about.description_additional_one' | t
+  assign about_intro_tertiary = 'sections.about.description_additional_two' | t
+  assign about_intro_quaternary = 'sections.about.description_additional_three' | t
+%}
+{% capture about_intro_default_capture %}
+    {% assign intro_parts = 0 %}
+    {% if about_intro_primary != blank %}
+      {% assign intro_parts = intro_parts | plus: 1 %}
+      {{- about_intro_primary -}}
+    {% endif %}
+    {% if about_intro_secondary != blank %}
+      {% if intro_parts > 0 %}{{ '\n\n' }}{% endif %}
+      {% assign intro_parts = intro_parts | plus: 1 %}
+      {{- about_intro_secondary -}}
+    {% endif %}
+    {% if about_intro_tertiary != blank %}
+      {% if intro_parts > 0 %}{{ '\n\n' }}{% endif %}
+      {% assign intro_parts = intro_parts | plus: 1 %}
+      {{- about_intro_tertiary -}}
+    {% endif %}
+    {% if about_intro_quaternary != blank %}
+      {% if intro_parts > 0 %}{{ '\n\n' }}{% endif %}
+      {{- about_intro_quaternary -}}
+    {% endif %}
+{% endcapture %}
+{% liquid
+  assign about_intro_default = about_intro_default_capture | strip
+  assign about_heading_text = section.settings.about_heading | default: about_heading_default
+  assign about_intro_text = section.settings.about_intro | default: about_intro_default
+  assign about_intro_paragraphs = about_intro_text | split: '\n\n'
+  assign about_narrative_heading_default = 'sections.about.narrative_heading' | t
+  assign about_narrative_body_default = 'sections.about.narrative_body' | t
+  assign about_narrative_heading_text = section.settings.about_narrative_heading | default: about_narrative_heading_default
+  assign about_narrative_body_text = section.settings.about_narrative_body | default: about_narrative_body_default
+  assign about_narrative_paragraphs = about_narrative_body_text | split: '\n\n'
 
   assign metric_blocks = section.blocks | where: 'type', 'about_metric'
   assign story_blocks = section.blocks | where: 'type', 'story_block'
@@ -87,36 +124,28 @@
       <div class="fof-about__heading">
         <h2 class="fof-about__title">{{ 'sections.about.title' | t }}</h2>
       </div>
-        {% liquid
-          assign about_heading_default = 'sections.about.subtitle' | t
-          assign about_intro_default = 'sections.about.description' | t
-          assign about_heading_text = section.settings.about_heading | default: about_heading_default
-          assign about_intro_text = section.settings.about_intro | default: about_intro_default
-          assign about_intro_paragraphs = about_intro_text | split: '\n\n'
-        %}
         <div class="fof-about__intro fof-about__intro--has-media">
           <div class="fof-about__intro-media">
-            {% if about_image %}
-              {{ about_image
-                | image_url: width: 1400
-                | image_tag:
-                  alt: about_image_alt,
-                  loading: 'lazy',
-                  widths: '700, 1000, 1400'
-              }}
-            {% else %}
-              <img
-                src="{{ 'GFCopen2.jpg' | asset_url }}"
-                alt="{{ about_image_alt }}"
-                width="4672"
-                height="7008"
-                loading="lazy"
-                class="fof-about__intro-media-fallback"
+          {% if about_image %}
+            {{ about_image
+              | image_url: width: 1400
+              | image_tag:
+                alt: about_image_alt,
+                loading: 'lazy',
+                widths: '700, 1000, 1400'
+            }}
+          {% else %}
+            <img
+              src="{{ 'DI5.jpg' | asset_url }}"
+              alt="{{ about_image_alt }}"
+              width="4672"
+              height="7008"
+              loading="lazy"
+              class="fof-about__intro-media-fallback"
               >
             {% endif %}
           </div>
           <div class="fof-about__intro-content">
-            <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
             <h2>{{ about_heading_text }}</h2>
             {% for paragraph in about_intro_paragraphs %}
               {% assign paragraph_clean = paragraph | strip %}
@@ -195,11 +224,10 @@
       <div class="fof-about__narrative">
         <div class="fof-about__narrative-content">
           <div class="fof-about__narrative-head">
-            <span class="fof-kicker">{{ section.settings.about_kicker | default: 'Born From The Trail' }}</span>
-            <h2>{{ about_heading_text }}</h2>
+            <h2>{{ about_narrative_heading_text }}</h2>
           </div>
           <div class="fof-about__narrative-columns">
-            {% for paragraph in about_intro_paragraphs limit: 2 %}
+            {% for paragraph in about_narrative_paragraphs limit: 2 %}
               {% assign paragraph_clean = paragraph | strip %}
               {% if paragraph_clean != blank %}
                 <p>{{ paragraph_clean }}</p>
@@ -499,11 +527,25 @@
           {% assign default_description = description_key | t %}
           {% liquid
             assign slot_class = rendered_feature_blocks | prepend: 'fof-feature-card--slot-'
+            assign card_background = block.settings.image
+            assign fallback_image = ''
+            assign card_title = block.settings.title | default: default_title
+            assign card_title_normalized = card_title | strip | downcase
+            if card_background == blank
+              if card_title_normalized == 'bolt-together design'
+                assign fallback_image = 'DI3.jpg'
+              endif
+            endif
           %}
-          <article
-            class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
-            {{ block.shopify_attributes }}
-          >
+        <article
+          class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
+          {% if card_background %}
+            style="background-image: url('{{ card_background | image_url: width: 1600 }}');"
+          {% elsif fallback_image != blank %}
+            style="background-image: url('{{ fallback_image | asset_url }}');"
+          {% endif %}
+          {{ block.shopify_attributes }}
+        >
             <div class="fof-feature-card__content">
               <h3>{{ block.settings.title | default: default_title }}</h3>
               {% assign feature_description = block.settings.description | default: default_description %}
@@ -758,7 +800,7 @@
     display: grid;
     gap: clamp(20px, 3.5vw, 32px);
     margin: 0 auto clamp(24px, 5vw, 40px);
-    max-width: min(940px, 90%);
+    max-width: min(1200px, 95%);
   }
 
   .fof-about__intro--has-media {
@@ -767,7 +809,7 @@
 
   @media (min-width: 900px) {
     .fof-about__intro--has-media {
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
       align-items: center;
     }
   }
@@ -793,7 +835,7 @@
   .fof-about__intro-content {
     display: grid;
     gap: clamp(18px, 3vw, 28px);
-    max-width: 620px;
+    max-width: min(880px, 100%);
   }
 
   .fof-about__intro-content h2 {
@@ -812,14 +854,14 @@
   .fof-about__narrative {
     display: grid;
     gap: clamp(24px, 4vw, 48px);
-    max-width: min(1100px, 95%);
+    max-width: min(1200px, 95%);
     margin: 0 auto clamp(32px, 5vw, 60px);
     align-items: center;
   }
 
   @media (min-width: 900px) {
     .fof-about__narrative {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
     }
   }
 
@@ -831,6 +873,7 @@
   .fof-about__narrative-head {
     display: grid;
     gap: 14px;
+    max-width: min(880px, 100%);
   }
 
   .fof-about__narrative-head h2 {
@@ -901,26 +944,29 @@
   .fof-about__metrics {
     display: grid;
     grid-auto-flow: column;
-    gap: clamp(16px, 4vw, 40px);
-    align-items: start;
+    gap: clamp(48px, 10vw, 120px);
+    align-items: center;
+    justify-content: center;
+    margin-top: clamp(12px, 3vw, 28px);
   }
 
   .fof-about__metric {
     display: grid;
-    gap: 6px;
+    gap: 4px;
+    text-align: center;
   }
 
   .fof-about__metric-value {
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-size: clamp(2.1rem, 5vw, 2.8rem);
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
+    color: #1f1b17;
   }
 
   .fof-about__metric-label {
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.78rem;
-    color: rgba(31, 27, 23, 0.65);
+    font-size: clamp(0.9rem, 2.6vw, 1rem);
+    letter-spacing: 0.02em;
+    color: rgba(31, 27, 23, 0.78);
   }
 
   .fof-about__stories {
@@ -1683,22 +1729,22 @@
       "default": "MORE THAN A FLATBED"
     },
     {
-      "type": "text",
-      "id": "about_kicker",
-      "label": "About kicker",
-      "default": "Born From The Trail"
-    },
-    {
-      "type": "text",
-      "id": "about_heading",
-      "label": "About heading",
-      "default": "Built by enthusiasts, for enthusiasts."
-    },
-    {
       "type": "textarea",
       "id": "about_intro",
       "label": "About intro",
-      "default": "We set out to create a flatbed system that works as hard as you do — light enough to go anywhere, strong enough to haul anything, and modular enough to evolve with every build."
+      "default": "I've been into trucks and off-roading my whole life, and after spending five years working in the off-road industry, I saw firsthand how fast this space is evolving. What stood out to me most is that we can still build high-quality, thoughtfully designed products right here in the U.S. that actually make sense for the people who use them every day."
+    },
+    {
+      "type": "text",
+      "id": "about_narrative_heading",
+      "label": "Secondary about heading",
+      "default": "What Makes Us Different"
+    },
+    {
+      "type": "textarea",
+      "id": "about_narrative_body",
+      "label": "Secondary about copy",
+      "default": "The thing that sets this bed apart from anything else on the market is its ability to flatpack ship straight to your door, paird with the modularity of an extruded aluminum deck. That means you can bolt on just about any accessory you can think of, and you're not locked into a single setup."
     },
     {
       "type": "image_picker",
@@ -1838,7 +1884,7 @@
           "type": "text",
           "id": "label",
           "label": "Label",
-          "default": "Years industry experience"
+          "default": "Years Industry Experience"
         }
       ]
     },
