@@ -499,11 +499,26 @@
           {% assign default_description = description_key | t %}
           {% liquid
             assign slot_class = rendered_feature_blocks | prepend: 'fof-feature-card--slot-'
+            assign feature_image = block.settings.image
+            assign feature_image_alt = block.settings.image_alt | default: block.settings.title | default: default_title
+            assign feature_image_alt = feature_image_alt | strip | escape
           %}
           <article
             class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
             {{ block.shopify_attributes }}
           >
+            {% if feature_image %}
+              <div class="fof-feature-card__media">
+                {{ feature_image
+                  | image_url: width: 1600
+                  | image_tag:
+                    alt: feature_image_alt,
+                    loading: 'lazy',
+                    widths: '600, 900, 1200, 1600',
+                    class: 'fof-feature-card__image'
+                }}
+              </div>
+            {% endif %}
             <div class="fof-feature-card__content">
               <h3>{{ block.settings.title | default: default_title }}</h3>
               {% assign feature_description = block.settings.description | default: default_description %}
@@ -1344,6 +1359,19 @@
     inset: 0;
     background: linear-gradient(180deg, rgba(13, 11, 9, 0.05) 0%, rgba(13, 11, 9, 0.54) 62%, rgba(13, 11, 9, 0.8) 100%);
     z-index: 1;
+  }
+
+  .fof-feature-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .fof-feature-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .fof-feature-card__content {
