@@ -61,46 +61,43 @@
     "about": {
       "title": "FAR OUT FLATBEDS",
       "subtitle": "Born From Experience",
-      "description": "I’ve been into trucks and off-roading my whole life, and after spending five years working in the off-road industry, I saw firsthand how fast this space is evolving. What stood out to me most is that we can still build high-quality, thoughtfully designed products right here in the U.S. that actually make sense for the people who use them every day.",
-      "description_additional_one": "Flatbeds have always grabbed my attention, but most options felt overbuilt or too limited. That’s why I started Far Out Flatbeds, to create a modular aluminum platform that’s strong, lightweight, and adaptable. Our goal is simple: build a bed that grows with your truck and your lifestyle. Designed by enthusiasts for enthusiasts, Far Out Flatbeds redefines what a flatbed can be with innovation, practicality, and style at its core.",
-      "description_additional_two": "",
+      "description": "I’ve been into trucks and off-roading pretty much my whole life. For the last five years I’ve worked in the off-road industry, which gave me a front row seat to how this space has grown and where it’s heading. The biggest thing I have taken away is the idea that we can build cool, well-thought-out stuff right here in the U.S., and do it in a way that actually makes sense for the people using it. Flatbeds have always caught my eye, but most felt overbuilt, limited, or not flexible enough. I wanted something modular that could change with your setup instead of locking you into one.",
+      "description_additional_one": "That idea became Far Out Flatbeds. Using extruded aluminum as the backbone, we built a platform that’s strong, lightweight, and endlessly adaptable — a bed that fits you, your truck, and your lifestyle.",
+      "description_additional_two": "Far Out Flatbeds is about more than building beds. It’s about rethinking what a flatbed can be — designed by enthusiasts, for enthusiasts, with innovation, practicality, and style at its core.",
       "description_additional_three": "",
       "narrative_heading": "Engineered for real miles",
-      "narrative_body": "Every Far Out Flatbed starts with a modular backbone, so you can bolt on storage, lighting, and accessories as your needs change.\n\nWe obsess over serviceability, so future upgrades are quick and every trail repair stays straightforward."
+      "narrative_body": "The thing that sets this bed apart from anything else on the market is its ability to flatpack ship straight to your door, paired with the modularity of an extruded aluminum deck. That means you can bolt on just about any accessory you can think of, and you're not locked into a single setup.\n\nIt's a flatbed built to change and adapt to whatever job or activity you're into. On top of that, it's designed to be universal. If you ever upgrade trucks — as long as it's a similar size and bed length, you can bring your flatbed with you.\n\nInstead of starting over every time you change rigs, your setup stays with you."
     },
     "features": {
       "title": "Features",
-      "kicker": "Modular By Design",
-      "heading": "Built to Evolve",
-      "subheading": "Seven hero modules showcase how the system adapts to every build.",
       "cards": {
         "1": {
           "title": "Bolt-Together Design",
-          "description": "Anodized aluminum extrusions connect with serviceable hardware so repairs and upgrades happen without downtime."
+          "description": "Anodized aluminum extrusions connect with serviceable hardware allowing for endless repairs and upgrades."
         },
         "2": {
-          "title": "Integrated Lighting",
-          "description": "Flush-mounted scene lights and DOT signals tuck into protected channels with plug-and-play harnessing."
+          "title": "Flatpac Shipping",
+          "description": "Our bolt-together design ships flat to your door and assembles fast for a modular upgrade."
         },
         "3": {
           "title": "Powder-Coated Armor",
           "description": "Textured powder coat shrugs off trail rash while sealed seams keep corrosion at bay."
         },
         "4": {
-          "title": "Tie-Down Ecosystem",
-          "description": "Adjustable cleats and recessed l-track anchor everything from camp kitchens to worksite payloads."
+          "title": "Oversized Fenders",
+          "description": "Designed to swallow 40-inch tires with room to spare, keeping clearance dialed on any trail."
         },
         "5": {
           "title": "Modular Gear Rails",
           "description": "Full-perimeter accessory rail accepts MOLLE plates, RTT mounts, and cargo solutions without drilling."
         },
         "6": {
-          "title": "Service-Ready Wiring",
-          "description": "Loomed conduits and labeled pass-throughs make electrical upgrades and diagnostics straightforward."
+          "title": "Storage Options",
+          "description": "Integrated drawers, cubbies, and tie-down points keep tools and gear organized for any mission."
         },
         "7": {
-          "title": "Future-Proof Corners",
-          "description": "Corner mounting plates accept add-on accessories—from recovery boards to camp tables—without drilling."
+          "title": "Transferable Between Vehicles",
+          "description": "Swap the flatbed onto any similar-size truck when you upgrade, so your setup keeps rolling with you."
         }
       }
     },

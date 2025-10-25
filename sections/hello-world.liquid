@@ -65,9 +65,6 @@
   assign story_blocks = section.blocks | where: 'type', 'story_block'
   assign feature_blocks = section.blocks | where: 'type', 'feature_card'
   assign feature_size_defaults = 'large,medium,medium,medium,small,medium,large' | split: ','
-  assign features_kicker_default = 'sections.features.kicker' | t
-  assign features_heading_default = 'sections.features.heading' | t
-  assign features_subheading_default = 'sections.features.subheading' | t
   assign featured_product_handle = section.settings.featured_product
   assign landing_product = blank
   if featured_product_handle != blank
@@ -496,18 +493,6 @@
       <div class="fof-features__title">
         <h2>{{ 'sections.features.title' | t }}</h2>
       </div>
-      <div class="fof-features__head">
-        {% assign features_kicker = section.settings.features_kicker | default: features_kicker_default %}
-        {% assign features_heading = section.settings.features_heading | default: features_heading_default %}
-        {% assign features_subheading = section.settings.features_subheading | default: features_subheading_default %}
-        {% if features_kicker != blank %}
-          <span class="fof-kicker">{{ features_kicker }}</span>
-        {% endif %}
-        <h3 class="fof-features__tagline">{{ features_heading }}</h3>
-        {% if features_subheading != blank %}
-          <p>{{ features_subheading }}</p>
-        {% endif %}
-      </div>
       <div class="fof-features__grid">
         {% assign required_feature_count = 7 %}
         {% assign rendered_feature_blocks = 0 %}
@@ -527,28 +512,30 @@
           {% assign default_description = description_key | t %}
           {% liquid
             assign slot_class = rendered_feature_blocks | prepend: 'fof-feature-card--slot-'
-            assign card_background = block.settings.image
-            assign fallback_image = ''
-            assign card_title = block.settings.title | default: default_title
-            assign card_title_normalized = card_title | strip | downcase
-            if card_background == blank
-              if card_title_normalized == 'bolt-together design'
-                assign fallback_image = 'DI3.jpg'
+            assign feature_title = block.settings.title | default: default_title
+            assign feature_description = block.settings.description | default: default_description
+            assign feature_image = block.settings.image
+            assign feature_background = ''
+            if feature_image
+              assign feature_background = feature_image | image_url: width: 1600
+            else
+              assign feature_title_handle = feature_title | strip | handleize
+              if feature_title_handle == 'bolt-together-design'
+                assign feature_background = 'DI3.jpg' | asset_url
               endif
             endif
+            assign feature_styles = ''
+            if feature_background != blank
+              assign feature_styles = "background-image: url('" | append: feature_background | append: "');"
+            endif
           %}
-        <article
-          class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
-          {% if card_background %}
-            style="background-image: url('{{ card_background | image_url: width: 1600 }}');"
-          {% elsif fallback_image != blank %}
-            style="background-image: url('{{ fallback_image | asset_url }}');"
-          {% endif %}
-          {{ block.shopify_attributes }}
-        >
+          <article
+            class="fof-feature-card fof-feature-card--{{ card_size }} {{ slot_class }}"
+            {% if feature_styles != blank %}style="{{ feature_styles }}"{% endif %}
+            {{ block.shopify_attributes }}
+          >
             <div class="fof-feature-card__content">
-              <h3>{{ block.settings.title | default: default_title }}</h3>
-              {% assign feature_description = block.settings.description | default: default_description %}
+              <h3>{{ feature_title }}</h3>
               {% if feature_description != blank %}
                 <p>{{ feature_description }}</p>
               {% endif %}
@@ -705,7 +692,7 @@
     background: #13100d;
     overflow: hidden;
     z-index: 0;
-    pointer-events: auto;
+    pointer-events: none;
   }
 
   .fof-hero::after {
@@ -734,6 +721,7 @@
     display: flex;
     align-items: flex-end;
     padding: clamp(2rem, 6vw, 4rem) clamp(2rem, 5vw, 5rem) clamp(3rem, 8vw, 6rem);
+    pointer-events: auto;
   }
 
   .fof-hero__headline {
@@ -753,7 +741,7 @@
 
   .fof-about {
     position: relative;
-    color: #1f1b17;
+    color: #ffffff;
     padding: clamp(60px, 8vw, 120px) 0;
     min-height: clamp(600px, 100vh, 900px);
     background: transparent;
@@ -835,7 +823,7 @@
   .fof-about__intro-content {
     display: grid;
     gap: clamp(18px, 3vw, 28px);
-    max-width: min(880px, 100%);
+    max-width: min(1040px, 100%);
   }
 
   .fof-about__intro-content h2 {
@@ -848,7 +836,11 @@
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(245, 241, 234, 0.88);
+    color: #ffffff;
+  }
+  .fof-about__intro-content p + p {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
   }
 
   .fof-about__narrative {
@@ -944,29 +936,26 @@
   .fof-about__metrics {
     display: grid;
     grid-auto-flow: column;
-    gap: clamp(48px, 10vw, 120px);
-    align-items: center;
-    justify-content: center;
-    margin-top: clamp(12px, 3vw, 28px);
+    gap: clamp(16px, 4vw, 40px);
+    align-items: start;
   }
 
   .fof-about__metric {
     display: grid;
-    gap: 4px;
-    text-align: center;
+    gap: 6px;
   }
 
   .fof-about__metric-value {
-    font-size: clamp(2.1rem, 5vw, 2.8rem);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
     font-weight: 700;
-    letter-spacing: 0.01em;
-    color: #1f1b17;
+    letter-spacing: 0.02em;
   }
 
   .fof-about__metric-label {
-    font-size: clamp(0.9rem, 2.6vw, 1rem);
-    letter-spacing: 0.02em;
-    color: rgba(31, 27, 23, 0.78);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    color: rgba(31, 27, 23, 0.65);
   }
 
   .fof-about__stories {
@@ -1732,19 +1721,19 @@
       "type": "textarea",
       "id": "about_intro",
       "label": "About intro",
-      "default": "I've been into trucks and off-roading my whole life, and after spending five years working in the off-road industry, I saw firsthand how fast this space is evolving. What stood out to me most is that we can still build high-quality, thoughtfully designed products right here in the U.S. that actually make sense for the people who use them every day."
+      "default": "I’ve been into trucks and off-roading pretty much my whole life. For the last five years I’ve worked in the off-road industry, which gave me a front row seat to how this space has grown and where it’s heading. The biggest thing I have taken away is the idea that we can build cool, well-thought-out stuff right here in the U.S., and do it in a way that actually makes sense for the people using it. Flatbeds have always caught my eye, but most felt overbuilt, limited, or not flexible enough. I wanted something modular that could change with your setup instead of locking you into one.\n\nThat idea became Far Out Flatbeds. Using extruded aluminum as the backbone, we built a platform that’s strong, lightweight, and endlessly adaptable — a bed that fits you, your truck, and your lifestyle.\n\nFar Out Flatbeds is about more than building beds. It’s about rethinking what a flatbed can be — designed by enthusiasts, for enthusiasts, with innovation, practicality, and style at its core."
     },
     {
       "type": "text",
       "id": "about_narrative_heading",
       "label": "Secondary about heading",
-      "default": "What Makes Us Different"
+      "default": "What makes us different"
     },
     {
       "type": "textarea",
       "id": "about_narrative_body",
       "label": "Secondary about copy",
-      "default": "The thing that sets this bed apart from anything else on the market is its ability to flatpack ship straight to your door, paird with the modularity of an extruded aluminum deck. That means you can bolt on just about any accessory you can think of, and you're not locked into a single setup."
+      "default": "The thing that sets this bed apart from anything else on the market is its ability to flatpack ship straight to your door, paired with the modularity of an extruded aluminum deck. That means you can bolt on just about any accessory you can think of, and you're not locked into a single setup.\n\nIt's a flatbed built to change and adapt to whatever job or activity you're into. On top of that, it's designed to be universal. If you ever upgrade trucks — as long as it's a similar size and bed length, you can bring your flatbed with you.\n\nInstead of starting over every time you change rigs, your setup stays with you."
     },
     {
       "type": "image_picker",
@@ -1822,24 +1811,6 @@
       "default": "What makes us different"
     },
     {
-      "type": "text",
-      "id": "features_kicker",
-      "label": "Features kicker",
-      "default": "Modular By Design"
-    },
-    {
-      "type": "text",
-      "id": "features_heading",
-      "label": "Features heading",
-      "default": "Built to evolve with every mile."
-    },
-    {
-      "type": "textarea",
-      "id": "features_subheading",
-      "label": "Features subheading",
-      "default": "Every Far Out Flatbed is a platform for accessories, storage, and future upgrades. Swap modules, add gear, and tune your rig for work or play."
-    },
-    {
       "type": "image_picker",
       "id": "contact_background",
       "label": "Contact background image"
@@ -1884,7 +1855,7 @@
           "type": "text",
           "id": "label",
           "label": "Label",
-          "default": "Years Industry Experience"
+          "default": "Years industry experience"
         }
       ]
     },
@@ -1956,7 +1927,7 @@
           "type": "textarea",
           "id": "description",
           "label": "Description",
-          "default": "Anodized aluminum extrusions connect with serviceable hardware so repairs and upgrades happen without downtime."
+          "default": "Anodized aluminum extrusions connect with serviceable hardware allowing for endless repairs and upgrades."
         },
         {
           "type": "image_picker",
