@@ -11,10 +11,13 @@
     {% render 'meta-tags' %}
 
     {{ content_for_header }}
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" defer></script>
   </head>
 
   <body>
-    {% sections 'header-group' %}
+    {% comment %} {% sections 'header-group' %} {% endcomment %}
+    {% section 'header' %}
 
     {{ content_for_layout }}
 
