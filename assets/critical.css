@@ -1,5 +1,19 @@
 /** Critical CSS for the theme. This file is included on every page. */
 
+:root {
+  --color-sand-950: #1f1b17;
+  --color-sand-900: #2b2620;
+  --color-sand-800: #3c342c;
+  --color-sand-700: #51463c;
+  --color-sand-600: #6a5e52;
+  --color-sand-500: #8b7a69;
+  --color-sand-400: #b09e8e;
+  --color-sand-300: #d2c3b3;
+  --color-sand-200: #e6d6c3;
+  --color-sand-100: #f0e5d8;
+  --color-sand-50: #f8f3ec;
+}
+
 /* Reset styles inspired by https://www.joshwcomeau.com/css/custom-css-reset/ */
 * {
   box-sizing: border-box;

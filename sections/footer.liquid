@@ -1,304 +1,214 @@
-<footer class="site-footer full-width">
-  {% liquid
-    assign quick_link_blocks = section.blocks | where: 'type', 'quick_links'
-    assign social_blocks = section.blocks | where: 'type', 'social_link'
-  %}
-  <div class="site-footer__shell">
-    <div class="site-footer__contact">
-      {% if section.settings.heading != blank %}
-        <h2>{{ section.settings.heading | escape }}</h2>
-      {% endif %}
+{% liquid
+  assign quick_link_blocks = section.blocks | where: 'type', 'quick_links'
+  assign social_blocks = section.blocks | where: 'type', 'social_link'
+%}
+<div class="mx-auto grid w-full max-w-[var(--content-width)] gap-[clamp(32px,6vw,48px)] px-[clamp(var(--page-margin),6vw,4rem)] py-[clamp(2rem,4vw,4rem)] md:grid-cols-3 md:items-start">
+  <div class="flex flex-col gap-4">
+    {% if section.settings.heading != blank %}
+      <h2 class="text-[clamp(1.6rem,3vw,2.2rem)] uppercase tracking-[0.08em]">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {% endif %}
 
-      {% if section.settings.email != blank %}
-        <a class="site-footer__email" href="mailto:{{ section.settings.email | strip }}">
-          {{ section.settings.email | escape }}
-        </a>
-      {% endif %}
+    {% if section.settings.email != blank %}
+      <a
+        class="inline-flex items-center gap-2 text-base font-semibold uppercase tracking-[0.04em] text-sand-100 hover:underline focus-visible:underline"
+        href="mailto:{{ section.settings.email | strip }}"
+      >
+        {{ section.settings.email | escape }}
+      </a>
+    {% endif %}
 
-      {% if section.settings.location != blank %}
-        <p class="site-footer__location">{{ section.settings.location | escape }}</p>
-      {% endif %}
-    </div>
+    {% if section.settings.location != blank %}
+      <p class="max-w-[32ch] text-base leading-relaxed text-sand-100/80">
+        {{ section.settings.location | escape }}
+      </p>
+    {% endif %}
+  </div>
 
-    {% assign fallback_links_default = 'about:#about,features:#features,shop:#shop,contact:#contact' | split: ',' %}
-    {% assign has_quick_links = false %}
-    {% capture quick_links_content %}
-      {% for block in quick_link_blocks %}
-        {% assign menu_handle = block.settings.menu %}
-        {% if menu_handle != blank %}
-          {% assign quick_links_menu = linklists[menu_handle] %}
-        {% else %}
-          {% assign quick_links_menu = blank %}
-        {% endif %}
-        {% assign should_render_fallback = false %}
-        {% if quick_links_menu == blank or quick_links_menu.links == blank %}
-          {% assign should_render_fallback = true %}
-        {% endif %}
-        {% if quick_links_menu != blank and quick_links_menu.links != blank %}
-          {% assign has_quick_links = true %}
-          <div class="site-footer__menu-group" {{ block.shopify_attributes }}>
-            {% assign quick_links_heading = block.settings.heading | strip %}
-            {% if quick_links_heading != blank %}
-              <h3>{{ quick_links_heading | escape }}</h3>
-            {% else %}
-              <h3>{{ 'quick_links.title' | t }}</h3>
-            {% endif %}
-            <ul>
-              {% for link in quick_links_menu.links %}
-                <li>
-                  <a href="{{ link.url }}">{{ link.title | escape }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% elsif should_render_fallback %}
-          {% assign has_quick_links = true %}
-          <div class="site-footer__menu-group" {{ block.shopify_attributes }}>
-            {% assign quick_links_heading = block.settings.heading | strip %}
-            {% if quick_links_heading != blank %}
-              <h3>{{ quick_links_heading | escape }}</h3>
-            {% else %}
-              <h3>{{ 'quick_links.title' | t }}</h3>
-            {% endif %}
-            <ul>
-              {% for pair in fallback_links_default %}
-                {% assign parts = pair | split: ':' %}
-                <li>
-                  <a href="{{ parts[1] }}">{{ parts[0] | capitalize }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-      {% endfor %}
-    {% endcapture %}
-    {% if has_quick_links %}
-      <nav class="site-footer__menu" aria-label="{{ 'general.accessibility.footer_menu' | t }}">
-        {{ quick_links_content }}
-      </nav>
-    {% elsif quick_link_blocks.size == 0 %}
-      <nav class="site-footer__menu" aria-label="{{ 'general.accessibility.footer_menu' | t }}">
-        <div class="site-footer__menu-group">
-          <h3>{{ 'quick_links.title' | t }}</h3>
-          <ul>
-            {% for pair in fallback_links_default %}
-              {% assign parts = pair | split: ':' %}
+  {% assign fallback_links_default = 'about:#about,features:#features,shop:#shop,contact:#contact' | split: ',' %}
+  {% assign has_quick_links = false %}
+  {% capture quick_links_content %}
+    {% for block in quick_link_blocks %}
+      {% assign menu_handle = block.settings.menu %}
+      {% if menu_handle != blank %}
+        {% assign quick_links_menu = linklists[menu_handle] %}
+      {% else %}
+        {% assign quick_links_menu = blank %}
+      {% endif %}
+      {% assign should_render_fallback = false %}
+      {% if quick_links_menu == blank or quick_links_menu.links == blank %}
+        {% assign should_render_fallback = true %}
+      {% endif %}
+      {% if quick_links_menu != blank and quick_links_menu.links != blank %}
+        {% assign has_quick_links = true %}
+        <div class="grid gap-3 text-sm" {{ block.shopify_attributes }}>
+          {% assign quick_links_heading = block.settings.heading | strip %}
+          {% if quick_links_heading != blank %}
+            <h3 class="text-sm font-semibold uppercase tracking-[0.08em]">
+              {{ quick_links_heading | escape }}
+            </h3>
+          {% else %}
+            <h3 class="text-sm font-semibold uppercase tracking-[0.08em]">
+              {{ 'quick_links.title' | t }}
+            </h3>
+          {% endif %}
+          <ul class="grid gap-2">
+            {% for link in quick_links_menu.links %}
               <li>
-                <a href="{{ parts[1] }}">{{ parts[0] | capitalize }}</a>
+                <a
+                  class="tracking-[0.04em] text-sand-100 hover:underline focus-visible:underline"
+                  href="{{ link.url }}"
+                >
+                  {{ link.title | escape }}
+                </a>
               </li>
             {% endfor %}
           </ul>
         </div>
-      </nav>
-    {% endif %}
-
-    {% assign has_social_links = false %}
-    {% capture social_links_items %}
-      {% for block in social_blocks %}
-        {% liquid
-          assign platform_name = block.settings.platform | default: ''
-          assign social_alt = block.settings.alt | default: platform_name
-          assign social_alt = social_alt | strip | escape
-        %}
-        {% if block.settings.logo != blank or platform_name != blank or block.settings.url != blank %}
-          {% assign has_social_links = true %}
-          <li {{ block.shopify_attributes }}>
-            <a href="{{ block.settings.url | default: '#' }}" target="_blank" rel="noopener" aria-label="{{ social_alt }}">
-              {% if block.settings.logo != blank %}
-                {{ block.settings.logo
-                  | image_url: width: 64
-                  | image_tag:
-                    widths: '32, 48, 64',
-                    alt: social_alt,
-                    loading: 'lazy'
-                }}
-              {% else %}
-                <span>{{ platform_name | escape }}</span>
-              {% endif %}
-            </a>
-          </li>
-        {% endif %}
-      {% endfor %}
-    {% endcapture %}
-    {% if has_social_links %}
-      <div class="site-footer__social" aria-label="{{ 'general.accessibility.social_media' | t }}">
-        <ul>
-          {{ social_links_items }}
+      {% elsif should_render_fallback %}
+        {% assign has_quick_links = true %}
+        <div class="grid gap-3 text-sm" {{ block.shopify_attributes }}>
+          {% assign quick_links_heading = block.settings.heading | strip %}
+          {% if quick_links_heading != blank %}
+            <h3 class="text-sm font-semibold uppercase tracking-[0.08em]">
+              {{ quick_links_heading | escape }}
+            </h3>
+          {% else %}
+            <h3 class="text-sm font-semibold uppercase tracking-[0.08em]">
+              {{ 'quick_links.title' | t }}
+            </h3>
+          {% endif %}
+          <ul class="grid gap-2">
+            {% for pair in fallback_links_default %}
+              {% assign parts = pair | split: ':' %}
+              <li>
+                <a
+                  class="tracking-[0.04em] text-sand-100 hover:underline focus-visible:underline"
+                  href="{{ parts[1] }}"
+                >
+                  {{ parts[0] | capitalize }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endcapture %}
+  {% if has_quick_links %}
+    <nav
+      class="grid gap-6 text-sm uppercase tracking-[0.08em]"
+      aria-label="{{ 'general.accessibility.footer_menu' | t }}"
+    >
+      {{ quick_links_content }}
+    </nav>
+  {% elsif quick_link_blocks.size == 0 %}
+    <nav
+      class="grid gap-6 text-sm uppercase tracking-[0.08em]"
+      aria-label="{{ 'general.accessibility.footer_menu' | t }}"
+    >
+      <div>
+        <h3 class="mb-3 text-sm font-semibold">{{ 'quick_links.title' | t }}</h3>
+        <ul class="grid gap-2">
+          {% for pair in fallback_links_default %}
+            {% assign parts = pair | split: ':' %}
+            <li>
+              <a
+                class="tracking-[0.04em] text-sand-100 hover:underline focus-visible:underline"
+                href="{{ parts[1] }}"
+              >
+                {{ parts[0] | capitalize }}
+              </a>
+            </li>
+          {% endfor %}
         </ul>
       </div>
-    {% else %}
-      <div class="site-footer__social" aria-label="{{ 'general.accessibility.social_media' | t }}">
-        <ul>
-          <li>
-            <a href="{{ section.settings.instagram_url | default: '#' }}" target="_blank" rel="noopener" aria-label="Instagram">
-              <svg class="site-footer__social-icon" viewBox="0 0 24 24" role="img" aria-hidden="true">
-                <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm5.5-.38a1.12 1.12 0 1 1 0 2.25 1.12 1.12 0 0 1 0-2.25Z" />
-              </svg>
-            </a>
-          </li>
-        </ul>
-      </div>
-    {% endif %}
-  </div>
+    </nav>
+  {% endif %}
 
-  <div class="site-footer__meta">
-    <div class="site-footer__shell site-footer__meta-shell">
-      <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</span>
+  {% assign has_social_links = false %}
+  {% capture social_links_items %}
+    {% for block in social_blocks %}
+      {% liquid
+        assign platform_name = block.settings.platform | default: ''
+        assign social_alt = block.settings.alt | default: platform_name
+        assign social_alt = social_alt | strip | escape
+      %}
+      {% if block.settings.logo != blank or platform_name != blank or block.settings.url != blank %}
+        {% assign has_social_links = true %}
+        <li {{ block.shopify_attributes }}>
+          <a
+            href="{{ block.settings.url | default: '#' }}"
+            target="_blank"
+            rel="noopener"
+            aria-label="{{ social_alt }}"
+            class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-sand-100/10 text-sand-100 transition hover:bg-sand-100/20 focus-visible:bg-sand-100/20"
+          >
+            {% if block.settings.logo != blank %}
+              {{ block.settings.logo
+                | image_url: width: 64
+                | image_tag:
+                  widths: '32, 48, 64',
+                  alt: social_alt,
+                  loading: 'lazy',
+                  class: 'h-6 w-6 object-contain'
+              }}
+            {% else %}
+              <span class="text-sm font-medium">{{ platform_name | escape }}</span>
+            {% endif %}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  {% endcapture %}
+  {% if has_social_links %}
+    <div class="flex flex-col gap-4" aria-label="{{ 'general.accessibility.social_media' | t }}">
+      <ul class="flex flex-wrap gap-4">
+        {{ social_links_items }}
+      </ul>
     </div>
+  {% else %}
+    <div class="flex flex-col gap-4" aria-label="{{ 'general.accessibility.social_media' | t }}">
+      <ul class="flex flex-wrap gap-4">
+        <li>
+          <a
+            href="{{ section.settings.instagram_url | default: '#' }}"
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram"
+            class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-sand-100/10 text-sand-100 transition hover:bg-sand-100/20 focus-visible:bg-sand-100/20"
+          >
+            <svg class="h-6 w-6 fill-current text-sand-100" viewBox="0 0 24 24" role="img" aria-hidden="true">
+              <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm5.5-.38a1.12 1.12 0 1 1 0 2.25 1.12 1.12 0 0 1 0-2.25Z" />
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+<div class="border-t border-sand-100/10">
+  <div class="mx-auto flex w-full max-w-[var(--content-width)] flex-col items-center justify-between gap-4 px-[clamp(var(--page-margin),5vw,4rem)] py-6 text-xs uppercase tracking-[0.06em] md:flex-row">
+    <span
+      >&copy; {{ 'now' | date: '%Y' }}
+      {{ shop.name -}}
+    </span>
   </div>
-</footer>
+</div>
 
 {% stylesheet %}
-  .site-footer {
-    background-color: #1f1b17;
-    color: #f5f1ea;
-  }
-
-  .site-footer__shell {
-    width: min(100%, var(--content-width));
-    margin: 0 auto;
-    display: grid;
-    gap: clamp(32px, 6vw, 48px);
-    padding-block: clamp(2rem, 4vw, 4rem);
-    padding-inline: clamp(var(--page-margin), 6vw, 4rem);
-  }
-  @media (min-width: 900px) {
-    .site-footer__shell {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      align-items: start;
-    }
-  }
-
-  .site-footer__contact h2 {
-    margin: 0;
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .site-footer__email {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 16px;
-    font-weight: 600;
-    color: inherit;
-    text-decoration: none;
-    letter-spacing: 0.04em;
-  }
-
-  .site-footer__email:hover,
-  .site-footer__email:focus-visible {
-    text-decoration: underline;
-  }
-
-  .site-footer__location {
-    margin: 16px 0 0;
-    max-width: 32ch;
-    line-height: 1.6;
-    color: rgba(245, 241, 234, 0.78);
-  }
-
-  .site-footer__menu {
-    display: grid;
-    gap: 24px;
-    justify-items: start;
-  }
-
-  .site-footer__menu-group h3 {
-    margin: 0 0 12px;
-    font-size: 0.9rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .site-footer__menu-group ul {
-    list-style: none;
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-  }
-
-  .site-footer__social ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin: 0;
-    padding: 0;
-  }
-
-  .site-footer__menu a {
-    color: inherit;
-    text-decoration: none;
-    letter-spacing: 0.04em;
-  }
-
-  .site-footer__menu a:hover,
-  .site-footer__menu a:focus-visible {
-    text-decoration: underline;
-  }
-
-  .site-footer__social a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(245, 241, 234, 0.1);
-    transition: background-color 0.2s ease;
-  }
-
-  .site-footer__social a:hover,
-  .site-footer__social a:focus-visible {
-    background: rgba(245, 241, 234, 0.2);
-  }
-
-  .site-footer__social img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-  }
-
-  .site-footer__social-icon {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-    color: #fff;
-  }
-
-  .site-footer__meta {
-    border-top: 1px solid rgba(245, 241, 234, 0.12);
-    margin-top: clamp(24px, 5vw, 48px);
-  }
-
-  .site-footer__meta-shell {
-    width: min(100%, var(--content-width));
-    margin: 0 auto;
-    padding: 18px clamp(var(--page-margin), 5vw, 4rem);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    font-size: 0.9rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 768px) {
-    .site-footer__meta-shell {
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-    }
+  #shopify-section-footer {
+    background-color: var(--color-sand-950);
+    color: var(--color-sand-100);
   }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.footer",
+  "tag": "footer",
   "settings": [
     {
       "type": "text",
