@@ -1,108 +1,61 @@
-<header class="header">
-  <a href="{{ routes.root_url }}" class="header__brand-icon" aria-label="{{ shop.name }}">
+<div class="flex w-full items-center justify-between gap-6 py-4">
+  <a href="{{ routes.root_url }}" class="inline-block leading-none" aria-label="{{ shop.name }}">
     <img
       src="{{ 'ICON BLACK.png' | asset_url }}"
       alt="{{ shop.name }}"
-      class="header__brand-image"
+      class="h-auto w-[7.5rem]"
       width="2001"
       height="556"
     >
   </a>
 
-  <nav class="header__menu" aria-label="Primary">
+  <nav class="flex items-center gap-6 text-[color:var(--color-foreground)]" aria-label="Primary">
     {% liquid
       assign nav_items = 'about:About,features:Features,shop:Shop,contact:Contact' | split: ','
     %}
     {% for item in nav_items %}
       {% assign parts = item | split: ':' %}
-      <a href="#{{ parts[0] }}" class="header__link">{{ parts[1] }}</a>
+      <a href="#{{ parts[0] }}" class="font-medium text-base">{{ parts[1] }}</a>
     {% endfor %}
 
     {% if shop.customer_accounts_enabled %}
-      <a href="{{ routes.account_url }}" class="header__icon-link" aria-label="{{ 'customer.account.title' | t }}">
+      <a
+        href="{{ routes.account_url }}"
+        class="relative inline-flex h-8 w-8 items-center justify-center"
+        aria-label="{{ 'customer.account.title' | t }}"
+      >
         {{ 'icon-account.svg' | inline_asset_content }}
       </a>
     {% endif %}
 
-    <a href="{{ routes.cart_url }}" class="header__icon-link" aria-label="{{ 'general.cart.title' | t }}">
+    <a
+      href="{{ routes.cart_url }}"
+      class="relative inline-flex h-8 w-8 items-center justify-center"
+      aria-label="{{ 'general.cart.title' | t }}"
+    >
       {% if cart.item_count > 0 %}
-        <sup class="header__cart-count">{{ cart.item_count }}</sup>
+        <sup class="absolute right-0 top-0 inline-flex min-w-[1.25rem] -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-[color:var(--color-foreground)] px-1 py-0.5 text-[0.75rem] font-semibold leading-none text-[color:var(--color-background)]">
+          {{ cart.item_count }}
+        </sup>
       {% endif %}
 
       {{ 'icon-cart.svg' | inline_asset_content }}
     </a>
   </nav>
-</header>
+</div>
 
 {% stylesheet %}
-  #shopify-section-group-header-group,
   #shopify-section-header {
+    background-color: var(--color-background);
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: #f0f0f0;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
-  }
-
-  .header {
-    padding: 1rem 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .header a {
-    position: relative;
-    text-decoration: none;
-    color: var(--color-foreground);
-  }
-
-  .header__menu {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .header__link {
-    font-weight: 500;
-  }
-
-  .header__icon-link svg {
-    width: 2rem;
-    height: 2rem;
-    display: block;
-  }
-
-  .header__brand-image {
-    display: block;
-    width: 7.5rem;
-    height: auto;
-  }
-
-  .header__brand-icon {
-    display: block;
-    line-height: 0;
-  }
-
-  .header__cart-count {
-    position: absolute;
-    transform: translate(50%, -50%);
-    top: 0;
-    right: 0;
-    min-width: 1.25rem;
-    padding: 0.125rem 0.25rem;
-    border-radius: 9999px;
-    background-color: var(--color-foreground);
-    color: var(--color-background);
-    font-size: 0.75rem;
-    line-height: 1;
-    text-align: center;
   }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.header",
-  "settings": []
+  "tag": "header"
 }
 {% endschema %}
