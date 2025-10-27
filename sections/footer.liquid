@@ -2,17 +2,17 @@
   assign quick_link_blocks = section.blocks | where: 'type', 'quick_links'
   assign social_blocks = section.blocks | where: 'type', 'social_link'
 %}
-<div class="mx-auto grid w-full max-w-[var(--content-width)] gap-[clamp(32px,6vw,48px)] px-[clamp(var(--page-margin),6vw,4rem)] py-[clamp(2rem,4vw,4rem)] md:grid-cols-3 md:items-start">
+<div class="flex gap-x-32 gap-y-16 py-16 flex-wrap">
   <div class="flex flex-col gap-4">
     {% if section.settings.heading != blank %}
-      <h2 class="text-[clamp(1.6rem,3vw,2.2rem)] uppercase tracking-[0.08em]">
+      <div class="text-4xl tracking-widest font-bold uppercase">
         {{ section.settings.heading | escape }}
-      </h2>
+      </div>
     {% endif %}
 
     {% if section.settings.email != blank %}
       <a
-        class="inline-flex items-center gap-2 text-base font-semibold uppercase tracking-[0.04em] text-sand-100 hover:underline focus-visible:underline"
+        class="font-semibold hover:underline focus-visible:underline"
         href="mailto:{{ section.settings.email | strip }}"
       >
         {{ section.settings.email | escape }}
@@ -75,9 +75,9 @@
               {{ quick_links_heading | escape }}
             </h3>
           {% else %}
-            <h3 class="text-sm font-semibold uppercase tracking-[0.08em]">
+            <div class="text-sm/loose font-semibold uppercase tracking-[0.08em]">
               {{ 'quick_links.title' | t }}
-            </h3>
+            </div>
           {% endif %}
           <ul class="grid gap-2">
             {% for pair in fallback_links_default %}
@@ -109,7 +109,7 @@
       aria-label="{{ 'general.accessibility.footer_menu' | t }}"
     >
       <div>
-        <h3 class="mb-3 text-sm font-semibold">{{ 'quick_links.title' | t }}</h3>
+        {% comment %} <h3 class="mb-3 text-sm font-semibold">{{ 'quick_links.title' | t }}</h3> {% endcomment %}
         <ul class="grid gap-2">
           {% for pair in fallback_links_default %}
             {% assign parts = pair | split: ':' %}
@@ -189,13 +189,11 @@
   {% endif %}
 </div>
 
-<div class="border-t border-sand-100/10">
-  <div class="mx-auto flex w-full max-w-[var(--content-width)] flex-col items-center justify-between gap-4 px-[clamp(var(--page-margin),5vw,4rem)] py-6 text-xs uppercase tracking-[0.06em] md:flex-row">
-    <span
-      >&copy; {{ 'now' | date: '%Y' }}
-      {{ shop.name -}}
-    </span>
-  </div>
+<div class="border-t border-sand-100/10 py-6 full-width shopify-section">
+  <small class="uppercase tracking-widest">
+    &copy; {{ 'now' | date: '%Y' }}
+    {{ shop.name -}}
+  </small>
 </div>
 
 {% stylesheet %}
